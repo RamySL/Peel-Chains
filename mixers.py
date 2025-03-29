@@ -9,14 +9,8 @@ def fetch_transaction(txid):
     response.raise_for_status()
     return response.json()
 
-graph = { "nodes": [], "edges": [] }
-
-def reset_graph():
-    global graph
-    graph = { "nodes": [], "edges": [] }
-
 def build_graph_from_transaction(txid, depth):
-    global graph
+    graph = { "nodes": [], "edges": [] }
 
     cpt = 0
     stack = [txid]
@@ -51,7 +45,7 @@ def build_graph_from_transaction(txid, depth):
                     "label": f"{inp['value'] / 100_000_000:.4f} BTC",
                     "input": True,
                     # Pour différencier différent inputs de la même personne.
-                    "input_id": f"{addr}{inp['txid']}{inp['output']}" 
+                    #"input_id": f"{addr}{inp['txid']}{inp['output']}" 
                 })
 
         for out in tx_data['outputs']:
@@ -70,10 +64,10 @@ def build_graph_from_transaction(txid, depth):
                                             "label": f"{out['value'] / 100_000_000:.8f} BTC",
                                             "input": False})
                     stack.append(out["spender"]["txid"])
-
         cpt = cpt + 1
 
-tx = '87c6dffb5e103e24295a134d2449dccf15ac7a6147f19f2a39731cf121668108'
+    return graph
 
-reset_graph()
-build_graph_from_transaction(tx,1)
+if __name__ == "__main__":
+    tx = '87c6dffb5e103e24295a134d2449dccf15ac7a6147f19f2a39731cf121668108'
+    print(build_graph_from_transaction(tx,1))
