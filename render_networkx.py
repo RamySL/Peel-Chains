@@ -2,8 +2,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from mixers import *
 
-#reset_graph()
-#build_graph_from_transaction('87c6dffb5e103e24295a134d2449dccf15ac7a6147f19f2a39731cf121668108', 3)
+'''
+Rendu du graphe avec networks, pas intéréssant pour de grandes profondeurs
+'''
+
 G = nx.MultiDiGraph()
 print (len(graph['edges']))
 for e in graph['edges']:

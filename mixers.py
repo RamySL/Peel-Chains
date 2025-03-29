@@ -48,8 +48,10 @@ def build_graph_from_transaction(txid, depth):
                 graph["edges"].append({
                     "from": addr,
                     "to": tx_data['txid'],
-                    "label": f"{inp['value'] / 100_000_000:.8f} BTC",
-                    "tx_to_out":False
+                    "label": f"{inp['value'] / 100_000_000:.4f} BTC",
+                    "input": True,
+                    # Pour différencier différent inputs de la même personne.
+                    "input_id": f"{addr}{inp['txid']}{inp['output']}" 
                 })
 
         for out in tx_data['outputs']:
@@ -66,7 +68,7 @@ def build_graph_from_transaction(txid, depth):
                     graph["edges"].append({ "from": tx_data['txid'],
                                             "to": addr,
                                             "label": f"{out['value'] / 100_000_000:.8f} BTC",
-                                            "tx_to_out":True})
+                                            "input": False})
                     stack.append(out["spender"]["txid"])
 
         cpt = cpt + 1
@@ -75,4 +77,3 @@ tx = '87c6dffb5e103e24295a134d2449dccf15ac7a6147f19f2a39731cf121668108'
 
 reset_graph()
 build_graph_from_transaction(tx,1)
-

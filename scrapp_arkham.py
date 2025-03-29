@@ -20,12 +20,16 @@ def scrapp_tags (addr):
     driver.get(URL+addr)
 
     res=[]
+    parent_element = None
     try:
         # Attendre que le conteneur avec les classes 'Header_tagsContainer__AE66N' soit visible
-        parent_element = WebDriverWait(driver, 8).until(
+        parent_element = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.CLASS_NAME, 'Header_tagsContainer__AE66N'))
         )
+    except Exception as e:
+        print(f" Pas de tags ou Erreur lors du chargement du conteneur parent pour: {addr}")
        
+    try:
         if parent_element:
             # Rechercher tous les éléments <div> avec la classe 'Header_tag__U86bs' à l'intérieur du parent
             tag_elements = parent_element.find_elements(By.XPATH, ".//div[contains(@class, 'Header_tag__U86bs')]")
@@ -36,7 +40,7 @@ def scrapp_tags (addr):
                 res = list(map(lambda tag: tag.text, tag_elements))
         
     except Exception as e:
-        print("Erreur :", e)
+        print(f"Erreur lors du chargement des tags pour: {addr}")
 
     driver.quit()
     return res
