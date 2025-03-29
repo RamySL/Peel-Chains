@@ -43,7 +43,7 @@ for e in graph['edges']:
         net.add_edge(from_, to_)
 
    
-# Plusieurs options peuvent être
+# Plusieurs options peuvent être définies pour l'affichage
 net.set_options('''
 var options = {
   "edges": {
