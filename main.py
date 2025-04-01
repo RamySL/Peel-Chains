@@ -5,10 +5,10 @@ def main():
     txid = input("TXID : ").strip()
     if not txid:
         print("Erreur : Aucun identifiant de transaction saisi.")
-        return
+        txid = '87c6dffb5e103e24295a134d2449dccf15ac7a6147f19f2a39731cf121668108'
 
     try:
-        depth = 3 
+        depth = 2
         graph = build_graph_from_transaction(txid, depth)
         render(graph)
         print("Le graphe a été généré et affiché dans 'graph.html'.")
