@@ -1,3 +1,3 @@
-lib/
-__pycache__/
-test_mpyvis.py
+src/lib/
+src/__pycache__/
+src/test_mpyvis.py

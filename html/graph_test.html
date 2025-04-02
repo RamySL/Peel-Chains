@@ -88,8 +88,8 @@
                   
 
                   // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([{"color": "#00ff00", "id": "0", "label": " ", "shape": "square", "title": "Transaction \n whs whs \n dinnndndndn"}, {"color": "#97c2fc", "id": "1", "label": " ", "shape": "square", "title": "Transaction \n whs whs \n dinnndndndn"}]);
-                  edges = new vis.DataSet([{"color": "#ff0000", "from": "0", "to": "1"}]);
+                  nodes = new vis.DataSet([{"color": "#00ff00", "id": "0", "label": "0", "shape": "square", "title": ""}, {"color": "#97c2fc", "id": "1", "label": "1", "shape": "square", "title": ""}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "#ff0000", "from": "0", "to": "1"}, {"arrows": "to", "color": "#ff0000", "from": "1", "to": "0"}]);
 
                   nodeColors = {};
                   allNodes = nodes.get({ returnType: "Object" });
@@ -100,7 +100,35 @@
                   // adding nodes and edges to the graph
                   data = {nodes: nodes, edges: edges};
 
-                  var options = {"edges": {"arrows": {"to": {"enabled": true, "scaleFactor": 1}}}};
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
 
                   
 
