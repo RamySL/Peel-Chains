@@ -1,3 +1,6 @@
 src/lib/
 src/__pycache__/
 src/test_mpyvis.py
+lib/
+__pycache__/
+html/graph_test.html
