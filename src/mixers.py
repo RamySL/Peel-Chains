@@ -11,7 +11,8 @@ Module de génération du graphe.
 BASE_URL = "https://api.blockchain.info/haskoin-store/btc"
 nb_dags = 0
 
-
+#### Définitions de classes ##########################################################################
+######################################################################################################
 class IterStructure(ABC):
     """
     Classe abstraite qui définie l'interface pour implémenter la structure qui va stocker les noeuds
@@ -25,6 +26,9 @@ class IterStructure(ABC):
         pass
     @abstractmethod
     def pop(self):
+        pass
+    @abstractmethod
+    def peek(self):
         pass
 
     def is_empty(self)->bool:
@@ -47,7 +51,13 @@ class IterDPS (IterStructure):
     def pop(self):
         return self.s.pop()
     
+    def peek(self):
+        res = self.pop()
+        self.push(res)
+        return res
     
+    
+  
 class IterBFS (IterStructure):
     """
     Classe pour implémnter le parcours en largeur
@@ -64,13 +74,20 @@ class IterBFS (IterStructure):
 
     def pop(self):
         return self.s.popleft()
+    
+    def peek(self):
+        res = self.pop()
+        self.s.appendleft(res)
+        return res
+    
 
 
+###########################################################################################
+######### Définition de fonctions ######################################################### 
 
-def graph_from_tx(txid:str, depth:int, structure:IterStructure, write=False, dst="edges.json"):
+def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, dst="edges.json"):
     global nb_dags
     graph = { "nodes": [], "edges": [] }
-
     if write:
         with open(dst, 'w') as file:
             json.dump({"edges": []}, file)
@@ -146,6 +163,92 @@ def graph_from_tx(txid:str, depth:int, structure:IterStructure, write=False, dst
                         structure.push((out["spender"]["txid"], curr_d+1))
         
     return graph
+'''
+Type de dict à ajouter dans la structure de parcours : 
+{tx_src: id d'une tx, addr: adresse, tx_dst: id d'une tx, v_out montant de l'outout depuis src, v_inp: }
+tq tx_src est une transaction dans laquelle addr était un output qui est dépensé dans tx_dst.
+On attend des arrêtes entre les trois
+'''
+def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=False, dst="edges.json"):
+    global nb_dags
+    graph = { "nodes": [], "edges": [] }
+    # compteur de noeuds
+    cpt = 0
+    curr = {"tx_src": None, "addr": None, "tx_dst": txid, "v_out": None, "v_inp": None}
+    explore_tx(txid, structure)
+    while (cpt < n_nodes and not structure.is_empty()):
+        
+        curr = structure.pop()
+        # ajout des noeuds
+        graph["nodes"].append({ 
+            "id": curr["tx_src"],
+            "label": f"TX: {curr["tx_src"][:8]}...",
+            "type": "transaction",
+            "DAG": False 
+        })
+
+        graph["nodes"].append({
+            "id": curr["addr"],
+            "label": f"A: {curr["addr"]}...",
+            "type": "address"
+        })   
+        cpt += 1 
+        graph["edges"].append({ "from": curr["tx_src"],
+                                "to": curr["addr"],
+                                "label": f"{curr['v_out'] / 100_000_000:.8f} BTC",
+                                "input": False,
+                                "DAG": False
+                                })
+        if(curr["tx_dst"]):  
+            graph["nodes"].append({ 
+                "id": curr["tx_dst"],
+                "label": f"TX: {curr["tx_dst"][:8]}...",
+                "type": "transaction",
+                "DAG": False 
+            })
+            graph["edges"].append({ "from": curr["addr"],
+                                "to": curr["tx_dst"],
+                                "label": f"{curr['v_inp'] / 100_000_000:.8f} BTC",
+                                "input": True,
+                                "DAG": False
+                                })
+        
+        explore_tx(curr["tx_dst"], structure)
+
+    return graph
+
+'''
+Parcoure les output d'une transaction et les ajoute pour le traitement dans la structure
+'''
+def explore_tx (tx_src, structure):
+    tx_data = fetch_transaction(tx_src)
+    tx_dst = None
+    for out in tx_data['outputs']:
+        addr = out['address']
+        v_out = 0
+        if(out["spent"] and out["spender"]):
+            tx_dst = out["spender"]["txid"]
+            v_out = get_inp_val(tx_src, tx_dst, addr)
+
+        structure.push({"tx_src": tx_src, 
+                        "addr": addr, 
+                        "tx_dst": tx_dst,
+                        "v_out":out["value"], 
+                        "v_inp": v_out
+                        })
+
+'''
+recup la valeur en satoshi, qu'a ramené addr en tant qu'input de tx_dst dépensé à partir de tx_src
+'''
+def get_inp_val (tx_src, tx_dst, addr):
+    tx_data = fetch_transaction(tx_dst)
+    for inp in tx_data["inputs"]:
+        if (inp["txid"] == tx_src):
+            return inp["value"]
+    # pas censé arriver
+    return None 
+        
+
    
 def fetch_transaction(txid):
     url = f"{BASE_URL}/transaction/{txid}"
@@ -176,7 +279,8 @@ def append_to_json_list(file_path, list_name, item):
     except Exception as e:
         print(f"Erreur lors de l'ajout à la liste JSON : {e}")
 
+#########################################################################################################
 
 if __name__ == "__main__":
     tx = '87c6dffb5e103e24295a134d2449dccf15ac7a6147f19f2a39731cf121668108'
-    print(graph_from_tx(tx,1, IterBFS())["nodes"])
+    print(graph_from_depth(tx,1, IterBFS())["nodes"])
