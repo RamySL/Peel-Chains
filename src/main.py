@@ -20,7 +20,7 @@ def main():
             print(f"Erreur lors de la génération du graphe : {e}")
     else:
         try:
-            n = 5
+            n = 50
             iter = IterDPS()
             graph = graph_from_nb_nodes(txid, n, iter)
             # Le nom du html généré est raltif à la transaction et à la profondeur du graphe

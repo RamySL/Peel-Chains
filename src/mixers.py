@@ -9,7 +9,6 @@ Module de génération du graphe.
 """
 
 BASE_URL = "https://api.blockchain.info/haskoin-store/btc"
-nb_dags = 0
 
 #### Définitions de classes ##########################################################################
 ######################################################################################################
@@ -89,9 +88,23 @@ class IterBFS (IterStructure):
 
 ###########################################################################################
 ######### Définition de fonctions ######################################################### 
+'''
+Retourne vrai si il ya un dag dans le graphe et marque la transaction comme étant un dag
+'''
+def is_dag (graph, txid):
+    for e in graph["edges"]:
+        # invariant que on va passer par le premier edge en premier et l'algo ajoute d'abord
+        # les inputs donc c'est dans e["to"] qu'il ya le txid 
+        # Il suffit de modifier le DAG = True que du premier, de tte les manière c'est le premier 
+        # affichage qui va rester
+        if e["to"] == txid:
+            print(f'DAG {txid}')
+            e["DAG"] = True
+            return True
+    return False
+
 
 def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, dst="edges.json"):
-    global nb_dags
     graph = { "nodes": [], "edges": [] }
     if write:
         with open(dst, 'w') as file:
@@ -99,22 +112,10 @@ def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, 
     # on push txid et la profondeur courante
     structure.push((txid,0))
     while not (structure.is_empty()) :
-        dag = False
+        
         (txid, curr_d) = structure.pop()
-        tx_data = fetch_transaction(txid)
-
-        for e in graph["edges"]:
-            # invariant que on va passer par le premier edge en premier et l'algo ajoute d'abord
-            # les inputs donc c'est dans e["to"] qu'il ya le txid 
-            # Il suffit de modifier le DAG = True que du premier, de tte les manière c'est le premier 
-            # affichage qui va rester
-            if e["to"] == txid:
-                print(f'DAG {txid}')
-                dag = True
-                e["DAG"] = True
-                break
-                
-
+        tx_data = fetch_transaction(txid)                
+        dag = is_dag(graph, txid)
         if not dag :    
 
             n = { "id": txid,
@@ -175,22 +176,20 @@ tq tx_src est une transaction dans laquelle addr était un output qui est dépen
 On attend des arrêtes entre les trois
 '''
 def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=False, dst="edges.json"):
-    global nb_dags
     graph = { "nodes": [], "edges": [] }
     # compteur de noeuds
     cpt = 0
     explore_tx(txid, structure)
-    while (cpt < n_nodes and not structure.is_empty()):
-        
-        curr = structure.pop()
-        #print(f"Current Node: TX_SRC={curr['tx_src']}, ADDR={curr['addr']}, TX_DST={curr['tx_dst']}, V_OUT={curr['v_out'] / 100_000_000:.8f} BTC, V_INP={curr['v_inp'] / 100_000_000:.8f} BTC")
-        # ajout des noeuds
-        graph["nodes"].append({ 
-            "id": curr["tx_src"],
-            "label": f"TX: {curr["tx_src"][:8]}...",
+    # first tx
+    graph["nodes"].append({ 
+            "id": txid,
+            "label": f"TX: {txid[:8]}...",
             "type": "transaction",
             "DAG": False 
         })
+    while (cpt < n_nodes and not structure.is_empty()):
+        
+        curr = structure.pop()
 
         graph["nodes"].append({
             "id": curr["addr"],
@@ -204,13 +203,20 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
                                 "input": False,
                                 "DAG": False
                                 })
+       
+        
         if(curr["tx_dst"]):  
-            graph["nodes"].append({ 
-                "id": curr["tx_dst"],
-                "label": f"TX: {curr["tx_dst"][:8]}...",
-                "type": "transaction",
-                "DAG": False 
-            })
+            dag = is_dag(graph, curr["tx_dst"])
+            if not dag : 
+                graph["nodes"].append({ 
+                    "id": curr["tx_dst"],
+                    "label": f"TX: {curr["tx_dst"][:8]}...",
+                    "type": "transaction",
+                    "DAG": False 
+                })
+                explore_tx(curr["tx_dst"], structure)
+                
+            # si dag alors tx_dst existe deja dans le graphe on met juste l'arrete
             graph["edges"].append({ "from": curr["addr"],
                                 "to": curr["tx_dst"],
                                 "label": f"{curr['v_inp'] / 100_000_000:.8f} BTC",
@@ -218,7 +224,6 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
                                 "DAG": False
                                 })
         
-            explore_tx(curr["tx_dst"], structure)
 
     return graph
 
