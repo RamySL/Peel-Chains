@@ -55,6 +55,8 @@ class IterDPS (IterStructure):
         res = self.pop()
         self.push(res)
         return res
+    def __str__(self):
+        return "DPS"
     
     
   
@@ -79,6 +81,9 @@ class IterBFS (IterStructure):
         res = self.pop()
         self.s.appendleft(res)
         return res
+
+    def __str__(self):
+        return "BFS"
     
 
 
@@ -174,11 +179,11 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
     graph = { "nodes": [], "edges": [] }
     # compteur de noeuds
     cpt = 0
-    curr = {"tx_src": None, "addr": None, "tx_dst": txid, "v_out": None, "v_inp": None}
     explore_tx(txid, structure)
     while (cpt < n_nodes and not structure.is_empty()):
         
         curr = structure.pop()
+        #print(f"Current Node: TX_SRC={curr['tx_src']}, ADDR={curr['addr']}, TX_DST={curr['tx_dst']}, V_OUT={curr['v_out'] / 100_000_000:.8f} BTC, V_INP={curr['v_inp'] / 100_000_000:.8f} BTC")
         # ajout des noeuds
         graph["nodes"].append({ 
             "id": curr["tx_src"],
@@ -213,7 +218,7 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
                                 "DAG": False
                                 })
         
-        explore_tx(curr["tx_dst"], structure)
+            explore_tx(curr["tx_dst"], structure)
 
     return graph
 
@@ -222,19 +227,20 @@ Parcoure les output d'une transaction et les ajoute pour le traitement dans la s
 '''
 def explore_tx (tx_src, structure):
     tx_data = fetch_transaction(tx_src)
-    tx_dst = None
+    
     for out in tx_data['outputs']:
+        tx_dst = None
         addr = out['address']
-        v_out = 0
+        v_inp = 0
         if(out["spent"] and out["spender"]):
             tx_dst = out["spender"]["txid"]
-            v_out = get_inp_val(tx_src, tx_dst, addr)
+            v_inp = get_inp_val(tx_src, tx_dst, addr)
 
         structure.push({"tx_src": tx_src, 
                         "addr": addr, 
                         "tx_dst": tx_dst,
                         "v_out":out["value"], 
-                        "v_inp": v_out
+                        "v_inp": v_inp
                         })
 
 '''

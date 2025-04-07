@@ -10,7 +10,7 @@ def main():
     by_depth = False
     if by_depth:
         try:
-            depth = 1
+            depth = 3
             graph = graph_from_depth(txid, depth, IterDPS())
             # Le nom du html généré est raltif à la transaction et à la profondeur du graphe
             dst =   f"../html/graph_depth_{depth}_{txid[:5]}.html"
@@ -19,12 +19,16 @@ def main():
         except Exception as e:
             print(f"Erreur lors de la génération du graphe : {e}")
     else:
+        try:
             n = 5
-            graph = graph_from_nb_nodes(txid, n, IterBFS())
+            iter = IterDPS()
+            graph = graph_from_nb_nodes(txid, n, iter)
             # Le nom du html généré est raltif à la transaction et à la profondeur du graphe
-            dst =   f"../html/graph_nb_{n}_{txid[:5]}.html"
+            dst =   f"../html/graph_nb_{n}_{iter}_{txid[:5]}.html"
             render(graph, dst)
             print(f"Le graphe a été généré et affiché dans {dst}.")
+        except Exception as e:
+            print(f"Erreur lors de la génération du graphe : {e}")
 
 
 

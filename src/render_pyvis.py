@@ -5,7 +5,7 @@ import time
 #from collect_tags import *
 import json
 
-net = Network(notebook=True, directed=True)
+net = Network(notebook=True, directed=True,height="100vh", width="100%")
 TAGS_BINANCE = None
 #Couleur par défaut des noeuds
 DEFAULT_COLOR = '#0000ff'
@@ -18,20 +18,9 @@ Elle est Hardcode avec la structure dans le fichier ./mixers.py
 '''
 def render(graph:dict, dst:str):
   global net
-
-  first_edge = graph['edges'][0]
-  # on affiche différemment notre tx de départ
-  first_tx = first_edge['to']
-  first_input = first_edge['from']
-  net.add_node(first_tx, label=" ", color='#c002fa', shape='square',title=format_infos(first_tx))
-  #tags = scrapp_arkham.scrapp_tags(first_input)
   tags = []
-  net.add_node(first_input, label=" ", color=color(tags), title=format_infos(first_input, tags),)
-  net.add_edge(first_input, first_tx, label=first_edge['label'], color="#000000")
-
-  #print (f"edge form : {first_input} to {first_tx}")
-
-  for e in graph['edges'][1:]:
+  first = True # pour colorer diff la premiere tx
+  for e in graph['edges']:
       
       from_ = e['from']
       to_ = e['to']
@@ -39,12 +28,18 @@ def render(graph:dict, dst:str):
           #from_ = e['input_id']
           #tags = scrapp_arkham.scrapp_tags(e['from'])
           #time.sleep(1) # pour ne pas a être bloqué
+
+          #addr
           net.add_node(from_,label=" ", color=color(tags), title=format_infos(e['from'], tags))
           #tx
-          if(e["DAG"]):
-            net.add_node(to_,label=" ",color="#ff0000",shape='square', title=format_infos(to_,["DAG"]))
-          else:
-            net.add_node(to_,label=" ",color="#00ffbf",shape='square', title=format_infos(to_))
+          if first:
+              net.add_node(to_,label=" ",color="#c002fa",shape='square', title=format_infos(to_))
+              first = False
+          else: 
+            if(e["DAG"]):
+              net.add_node(to_,label=" ",color="#ff0000",shape='square', title=format_infos(to_,["DAG"]))
+            else:
+              net.add_node(to_,label=" ",color="#00ffbf",shape='square', title=format_infos(to_))
 
           net.add_edge(from_, to_,label=e['label'], color="#000000") 
 
@@ -52,12 +47,16 @@ def render(graph:dict, dst:str):
       else:
           #tags = scrapp_arkham.scrapp_tags(e['to'])
           #time.sleep(1) # pour ne pas a être bloqué
-          #tx
-        net.add_node(from_, label=" ", color="#ff0000", shape='square', title=format_infos(from_))
+        #tx
+        if first:
+          net.add_node(from_,label=" ",color="#c002fa",shape='square', title=format_infos(from_))
+          first = False
+        else:
+          net.add_node(from_, label=" ", color="#00ffbf", shape='square', title=format_infos(from_))
+        #addr
         net.add_node(to_, label=" ",color=color(tags), title=format_infos(to_,tags))
         net.add_edge(from_, to_,label=e['label'])
 
-      #print (f"edge form : {from_} to {to_}")
 
   #scrapp_arkham.quit_driver()
   net.show(dst)
