@@ -3,6 +3,7 @@ import requests
 import json
 from abc import ABC, abstractmethod
 from collections import deque
+from scrapp_arkham import scrapp_tags
 
 """
 Module de génération du graphe.
@@ -89,6 +90,11 @@ class IterBFS (IterStructure):
 ###########################################################################################
 ######### Définition de fonctions ######################################################### 
 '''
+Défini la structure du graphe
+'''
+def init_graph():
+    return { "nodes": [], "edges": [] }
+'''
 Retourne vrai si il ya un dag dans le graphe et marque la transaction comme étant un dag
 '''
 def is_dag (graph, txid):
@@ -105,7 +111,8 @@ def is_dag (graph, txid):
 
 
 def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, dst="edges.json"):
-    graph = { "nodes": [], "edges": [] }
+    graph = init_graph()
+
     if write:
         with open(dst, 'w') as file:
             json.dump({"edges": []}, file)
@@ -138,8 +145,6 @@ def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, 
                         "label": f"{inp['value'] / 100_000_000:.4f} BTC",
                         "input": True,
                         "DAG": False
-                        # Pour différencier différent inputs de la même personne.
-                        #"input_id": f"{addr}{inp['txid']}{inp['output']}" 
                     }
                     graph["edges"].append(edge)
                     if write:
@@ -176,7 +181,7 @@ tq tx_src est une transaction dans laquelle addr était un output qui est dépen
 On attend des arrêtes entre les trois
 '''
 def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=False, dst="edges.json"):
-    graph = { "nodes": [], "edges": [] }
+    graph = init_graph()
     # compteur de noeuds
     cpt = 0
     explore_tx(txid, structure)
@@ -190,22 +195,28 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
     while (cpt < n_nodes and not structure.is_empty()):
         
         curr = structure.pop()
-
+        tags = scrapp_tags(curr["addr"])
+        exch = any(tag in ["Centralized Exchange","Hot Wallet"] for tag in tags)
+        if(exch):
+            print("exchange : " + curr["addr"])
         graph["nodes"].append({
             "id": curr["addr"],
             "label": f"A: {curr["addr"]}...",
-            "type": "address"
+            "type": "address",
+            "exchange": exch,
+            "tags":tags
         })   
         cpt += 1 
         graph["edges"].append({ "from": curr["tx_src"],
                                 "to": curr["addr"],
                                 "label": f"{curr['v_out'] / 100_000_000:.8f} BTC",
                                 "input": False,
-                                "DAG": False
+                                "DAG": False,
+                                "exchange": exch,
+                                "tags": tags
                                 })
-       
         
-        if(curr["tx_dst"]):  
+        if(curr["tx_dst"] and not exch):  
             dag = is_dag(graph, curr["tx_dst"])
             if not dag : 
                 graph["nodes"].append({ 
@@ -215,20 +226,24 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
                     "DAG": False 
                 })
                 explore_tx(curr["tx_dst"], structure)
-                
+
             # si dag alors tx_dst existe deja dans le graphe on met juste l'arrete
             graph["edges"].append({ "from": curr["addr"],
                                 "to": curr["tx_dst"],
                                 "label": f"{curr['v_inp'] / 100_000_000:.8f} BTC",
                                 "input": True,
-                                "DAG": False
+                                "DAG": False,
+                                "exchange": False,
+                                "tags": tags
                                 })
         
 
     return graph
 
 '''
-Parcoure les output d'une transaction et les ajoute pour le traitement dans la structure
+Parcoure les output d'une transaction et les ajoute pour le traitement dans la structure.
+pour Les BTC entre tx_src -> addr et entre addr -> tx_dst on utilise les même (on ignore les frais) parce que
+ce n'est pas une info pertinente
 '''
 def explore_tx (tx_src, structure):
     tx_data = fetch_transaction(tx_src)
@@ -236,16 +251,17 @@ def explore_tx (tx_src, structure):
     for out in tx_data['outputs']:
         tx_dst = None
         addr = out['address']
-        v_inp = 0
+        #v_inp = 0
         if(out["spent"] and out["spender"]):
             tx_dst = out["spender"]["txid"]
-            v_inp = get_inp_val(tx_src, tx_dst, addr)
+            #v_inp = get_inp_val(tx_src, tx_dst, addr)
 
         structure.push({"tx_src": tx_src, 
                         "addr": addr, 
                         "tx_dst": tx_dst,
                         "v_out":out["value"], 
-                        "v_inp": v_inp
+                        #"v_inp": v_inp
+                        "v_inp": out["value"]
                         })
 
 '''

@@ -42,3 +42,8 @@ def scrapp_tags (addr):
 
 def quit_driver():
     DRIVER.quit()
+
+if __name__ == "__main__":
+    addr = "1EEqRvnS7XqMoXDcaGL7bLS3hzZi1qUZm1"
+    print(scrapp_tags(addr))
+    quit_driver()
