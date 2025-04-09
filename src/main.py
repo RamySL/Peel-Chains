@@ -1,5 +1,9 @@
 from mixers import graph_from_depth,graph_from_nb_nodes, IterBFS, IterDPS, IterPriority
 from render_pyvis import render
+from render_interactive import render_interactive_with_click_only as render
+
+
+
 
 def main():
     txid = input("TXID : ").strip()
@@ -17,7 +21,7 @@ def main():
         print(f"Le graphe a été généré et affiché dans {dst}.")
 
     else:
-        n = 100
+        n = 3
         iter = IterBFS()
         graph = graph_from_nb_nodes(txid, n, iter)
         # Le nom du html généré est raltif à la transaction et à la profondeur du graphe

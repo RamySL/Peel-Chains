@@ -244,7 +244,7 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
             print("exchange : " + curr["addr"])
         graph["nodes"].append({
             "id": curr["addr"],
-            "label": f"A: {curr["addr"]}...",
+            "label": f"A: {curr['addr']}...",
             "type": "address",
             "exchange": exch,
             "tags":tags
@@ -264,7 +264,7 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
             if not dag : 
                 graph["nodes"].append({ 
                     "id": curr["tx_dst"],
-                    "label": f"TX: {curr["tx_dst"][:8]}...",
+                    "label": f"TX: {curr['tx_dst'][:8]}...",
                     "type": "transaction",
                     "DAG": False 
                 })
