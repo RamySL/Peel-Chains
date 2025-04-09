@@ -4,7 +4,8 @@ import json
 from abc import ABC, abstractmethod
 from collections import deque
 from scrapp_arkham import scrapp_tags
-
+import heapq
+from itertools import count
 """
 Module de génération du graphe.
 """
@@ -86,6 +87,48 @@ class IterBFS (IterStructure):
         return "BFS"
     
 
+class IterPriority(IterStructure):
+    '''
+    Implémentation d'une file de priorité avec un tas binaire. 
+    La priorité est pour les outputs avec le plsu de valeur
+    c'est tas-min.
+
+    Les elts qu'elle prend doivent etre de type : 
+    {"tx_src": tx_src, 
+    "addr": addr, 
+    "tx_dst": tx_dst,
+    "v_out":out["value"], 
+    #"v_inp": v_inp
+    "v_inp": out["value"]
+    })
+    '''
+    # max pour tas max ou tas min (entier soit -1 soit 1)
+    # -1 pour tas max, 1 pour tas min
+    def __init__(self, tas_max=-1):
+        # utile pour éviter que l'ordre lexico ne compare des elts qui ne peuvent pas être ordonnés dans le push
+        self.tas_max = tas_max
+        self.counter = count()
+        super().__init__([])
+    
+    def push(self, item):
+        """
+        Ajoute un élément à la file de priorité.
+        un tuple (priority, data), où priority est un nombre.
+        """
+        heapq.heappush(self.s, ((self.tas_max * item["v_out"],next(self.counter)), item))
+
+    def pop(self):
+        """
+        retourne l'elt avec la plus haute priorité (plus petite valeur)
+        """
+        return heapq.heappop(self.s)[1]
+
+    def peek(self):
+        
+        return self.s[0]
+
+    def __str__(self):
+        return "PQ"
 
 ###########################################################################################
 ######### Définition de fonctions ######################################################### 
@@ -142,7 +185,7 @@ def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, 
                     edge = {
                         "from": addr,
                         "to": txid,
-                        "label": f"{inp['value'] / 100_000_000:.4f} BTC",
+                        "label": f"{inp['value'] / 100_000_000:.4f}".rstrip('0').rstrip('.') + " BTC",
                         "input": True,
                         "DAG": False
                     }
@@ -162,7 +205,7 @@ def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, 
                     graph["nodes"].append(node)
                     edge = { "from": txid,
                             "to": addr,
-                            "label": f"{out['value'] / 100_000_000:.8f} BTC",
+                            "label": f"{out['value'] / 100_000_000:.4f}".rstrip('0').rstrip('.') + " BTC",
                             "input": False,
                             "DAG": False
                             }
@@ -209,7 +252,7 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
         cpt += 1 
         graph["edges"].append({ "from": curr["tx_src"],
                                 "to": curr["addr"],
-                                "label": f"{curr['v_out'] / 100_000_000:.8f} BTC",
+                                "label": f"{curr['v_out'] / 100_000_000:.4f}".rstrip('0').rstrip('.') + " BTC",
                                 "input": False,
                                 "DAG": False,
                                 "exchange": exch,
@@ -230,7 +273,7 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
             # si dag alors tx_dst existe deja dans le graphe on met juste l'arrete
             graph["edges"].append({ "from": curr["addr"],
                                 "to": curr["tx_dst"],
-                                "label": f"{curr['v_inp'] / 100_000_000:.8f} BTC",
+                                "label": f"{curr['v_inp'] / 100_000_000:.4f}".rstrip('0').rstrip('.') + " BTC",
                                 "input": True,
                                 "DAG": False,
                                 "exchange": False,

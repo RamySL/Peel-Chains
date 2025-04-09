@@ -1,4 +1,4 @@
-from mixers import graph_from_depth,graph_from_nb_nodes, IterBFS, IterDPS
+from mixers import graph_from_depth,graph_from_nb_nodes, IterBFS, IterDPS, IterPriority
 from render_pyvis import render
 
 def main():
@@ -9,26 +9,22 @@ def main():
     # si vous voulez générer en fonction de profondeur mettez True sinon
     by_depth = False
     if by_depth:
-        try:
-            depth = 3
-            graph = graph_from_depth(txid, depth, IterDPS())
-            # Le nom du html généré est raltif à la transaction et à la profondeur du graphe
-            dst =   f"../html/graph_depth_{depth}_{txid[:5]}.html"
-            render(graph, dst)
-            print(f"Le graphe a été généré et affiché dans {dst}.")
-        except Exception as e:
-            print(f"Erreur lors de la génération du graphe : {e}")
+        depth = 3
+        graph = graph_from_depth(txid, depth, IterDPS())
+        # Le nom du html généré est raltif à la transaction et à la profondeur du graphe
+        dst =   f"../html/graph_depth_{depth}_{txid[:5]}.html"
+        render(graph, dst)
+        print(f"Le graphe a été généré et affiché dans {dst}.")
+
     else:
-        try:
-            n = 50
-            iter = IterDPS()
-            graph = graph_from_nb_nodes(txid, n, iter)
-            # Le nom du html généré est raltif à la transaction et à la profondeur du graphe
-            dst =   f"../html/graph_nb_{n}_{iter}_{txid[:5]}.html"
-            render(graph, dst)
-            print(f"Le graphe a été généré et affiché dans {dst}.")
-        except Exception as e:
-            print(f"Erreur lors de la génération du graphe : {e}")
+        n = 100
+        iter = IterBFS()
+        graph = graph_from_nb_nodes(txid, n, iter)
+        # Le nom du html généré est raltif à la transaction et à la profondeur du graphe
+        dst =   f"../html/graph_nb_{n}_{iter}_{txid[:5]}.html"
+        render(graph, dst)
+        print(f"Le graphe a été généré et affiché dans {dst}.")
+        
 
 
 
