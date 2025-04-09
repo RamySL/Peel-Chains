@@ -17,8 +17,8 @@ def main():
         print(f"Le graphe a été généré et affiché dans {dst}.")
 
     else:
-        n = 100
-        iter = IterBFS()
+        n = 20
+        iter = IterDPS()
         graph = graph_from_nb_nodes(txid, n, iter)
         # Le nom du html généré est raltif à la transaction et à la profondeur du graphe
         dst =   f"../html/graph_nb_{n}_{iter}_{txid[:5]}.html"

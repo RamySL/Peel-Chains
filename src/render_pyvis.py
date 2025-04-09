@@ -26,10 +26,11 @@ first = True # pour colorer diff la premiere tx
 Attend un graphe sous forme de dictionnaire avec comme clés : nodes et edges.
 Elle est Hardcode avec la structure dans le fichier ./mixers.py
 '''
-def render(graph:dict, dst:str):
+def render(graph, dst:str):
   global net
-  for e in graph['edges']:
-      
+
+  for _,_,e in graph.edges(data=True):
+      e = e["meta"]
       from_ = e['from']
       to_ = e['to']
       if (e["input"]):

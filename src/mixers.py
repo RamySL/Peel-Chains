@@ -6,6 +6,7 @@ from collections import deque
 from scrapp_arkham import scrapp_tags
 import heapq
 from itertools import count
+import networkx as nx
 """
 Module de génération du graphe.
 """
@@ -117,7 +118,7 @@ class IterPriority(IterStructure):
         """
         heapq.heappush(self.s, ((self.tas_max * item["v_out"],next(self.counter)), item))
 
-    def pop(self):
+    def pop(self):  
         """
         retourne l'elt avec la plus haute priorité (plus petite valeur)
         """
@@ -224,7 +225,10 @@ tq tx_src est une transaction dans laquelle addr était un output qui est dépen
 On attend des arrêtes entre les trois
 '''
 def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=False, dst="edges.json"):
+    TX_ID = txid
     graph = init_graph()
+    g = nx.Graph()
+    g.edges
     # compteur de noeuds
     cpt = 0
     explore_tx(txid, structure)
@@ -235,6 +239,7 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
             "type": "transaction",
             "DAG": False 
         })
+    
     while (cpt < n_nodes and not structure.is_empty()):
         
         curr = structure.pop()
@@ -242,23 +247,26 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
         exch = any(tag in ["Centralized Exchange","Hot Wallet"] for tag in tags)
         if(exch):
             print("exchange : " + curr["addr"])
-        graph["nodes"].append({
-            "id": curr["addr"],
-            "label": f"A: {curr["addr"]}...",
-            "type": "address",
-            "exchange": exch,
-            "tags":tags
-        })   
+        #graph["nodes"].append({
+        #    "id": curr["addr"],
+         #   "label": f"A: {curr["addr"]}...",
+          #  "type": "address",
+           # "exchange": exch,
+            #"tags":tags
+        #})   
+        
         cpt += 1 
-        graph["edges"].append({ "from": curr["tx_src"],
+        edge = { "from": curr["tx_src"],
                                 "to": curr["addr"],
                                 "label": f"{curr['v_out'] / 100_000_000:.4f}".rstrip('0').rstrip('.') + " BTC",
                                 "input": False,
                                 "DAG": False,
                                 "exchange": exch,
                                 "tags": tags
-                                })
-        
+                                }
+        #graph["edges"].append(edge)
+        g.add_edge(curr["tx_src"], curr["addr"], meta=edge )
+
         if(curr["tx_dst"] and not exch):  
             dag = is_dag(graph, curr["tx_dst"])
             if not dag : 
@@ -269,19 +277,19 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
                     "DAG": False 
                 })
                 explore_tx(curr["tx_dst"], structure)
-
-            # si dag alors tx_dst existe deja dans le graphe on met juste l'arrete
-            graph["edges"].append({ "from": curr["addr"],
+            edge = { "from": curr["addr"],
                                 "to": curr["tx_dst"],
                                 "label": f"{curr['v_inp'] / 100_000_000:.4f}".rstrip('0').rstrip('.') + " BTC",
                                 "input": True,
                                 "DAG": False,
                                 "exchange": False,
                                 "tags": tags
-                                })
+                                }
+            # si dag alors tx_dst existe deja dans le graphe on met juste l'arrete
+            #graph["edges"].append(edge)
+            g.add_edge(curr["addr"], curr["tx_dst"], meta=edge )
         
-
-    return graph
+    return g
 
 '''
 Parcoure les output d'une transaction et les ajoute pour le traitement dans la structure.
