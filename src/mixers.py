@@ -272,7 +272,7 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
             if not dag : 
                 graph["nodes"].append({ 
                     "id": curr["tx_dst"],
-                    "label": f"TX: {curr["tx_dst"][:8]}...",
+                    "label": f"TX: {curr['tx_dst'][:8]}...",
                     "type": "transaction",
                     "DAG": False 
                 })
