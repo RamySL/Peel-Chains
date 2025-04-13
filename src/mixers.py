@@ -133,11 +133,22 @@ class IterPriority(IterStructure):
 
 ###########################################################################################
 ######### Définition de fonctions ######################################################### 
+
 '''
-Défini la structure du graphe
+La structure que le render_graph.py attend pour les edges est la sivantes : 
+
+    edge = { "from": str,
+            "to": str,
+            "label": str (f"{curr['v_out'] / 100_000_000:.4f}".rstrip('0').rstrip('.') + " BTC"),
+            "input": bool,
+            "DAG": bool,
+            "exchange": bool,
+            "tags": list
+            }
+    Donc en plus d'ajouter les arrêtes dans le DiGraph() avec le src et dst en passe en méta donnée la structure précédentes
+    comme ça elle sera utilisée par la vue (elle est passé dans un champ "meta")
 '''
-def init_graph():
-    return { "nodes": [], "edges": [] }
+
 '''
 Retourne vrai si il ya un dag dans le graphe et marque la transaction comme étant un dag
 '''
@@ -155,7 +166,7 @@ def is_dag (graph, txid):
 
 
 def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, dst="edges.json"):
-    graph = init_graph()
+    graph = nx.DiGraph()
 
     if write:
         with open(dst, 'w') as file:
@@ -166,23 +177,12 @@ def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, 
         
         (txid, curr_d) = structure.pop()
         tx_data = fetch_transaction(txid)                
-        dag = is_dag(graph, txid)
+        #dag = is_dag(graph, txid)
+        dag = False
         if not dag :    
-
-            n = { "id": txid,
-              "label": f"TX: {tx_data['txid'][:8]}...",
-              "type": "transaction",
-               "DAG": False }
-            graph["nodes"].append(n)
-
             for inp in tx_data['inputs']:
                 addr = inp['address']
                 if not inp['coinbase']:
-                    graph["nodes"].append({
-                        "id": addr,
-                        "label": f"A: {addr[:5]}...",
-                        "type": "address"
-                    })
                     edge = {
                         "from": addr,
                         "to": txid,
@@ -190,7 +190,7 @@ def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, 
                         "input": True,
                         "DAG": False
                     }
-                    graph["edges"].append(edge)
+                    graph.add_edge(addr, txid, meta=edge)
                     if write:
                         append_to_json_list(dst, "edges", edge)
 
@@ -198,19 +198,13 @@ def graph_from_depth(txid:str, depth:int, structure:IterStructure, write=False, 
             for out in tx_data['outputs']:
                 addr = out['address']
                 if addr:
-                    node = {
-                        "id": addr,
-                        "label": f"A: {addr[:5]}...",
-                        "type": "address"
-                    }
-                    graph["nodes"].append(node)
                     edge = { "from": txid,
                             "to": addr,
                             "label": f"{out['value'] / 100_000_000:.4f}".rstrip('0').rstrip('.') + " BTC",
                             "input": False,
                             "DAG": False
                             }
-                    graph["edges"].append(edge)
+                    graph.add_edge(txid,addr, meta=edge )
                     if write:
                         append_to_json_list(dst, "edges", edge)
                     # redendant de tester à chaque fois current depth
@@ -225,21 +219,11 @@ tq tx_src est une transaction dans laquelle addr était un output qui est dépen
 On attend des arrêtes entre les trois
 '''
 def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=False, dst="edges.json"):
-    TX_ID = txid
-    graph = init_graph()
-    g = nx.Graph()
-    g.edges
+    graph = nx.DiGraph()
     # compteur de noeuds
     cpt = 0
     explore_tx(txid, structure)
-    # first tx
-    graph["nodes"].append({ 
-            "id": txid,
-            "label": f"TX: {txid[:8]}...",
-            "type": "transaction",
-            "DAG": False 
-        })
-    
+
     while (cpt < n_nodes and not structure.is_empty()):
         
         curr = structure.pop()
@@ -247,15 +231,8 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
         exch = any(tag in ["Centralized Exchange","Hot Wallet"] for tag in tags)
         if(exch):
             print("exchange : " + curr["addr"])
-        #graph["nodes"].append({
-        #    "id": curr["addr"],
-         #   "label": f"A: {curr["addr"]}...",
-          #  "type": "address",
-           # "exchange": exch,
-            #"tags":tags
-        #})   
-        
         cpt += 1 
+
         edge = { "from": curr["tx_src"],
                                 "to": curr["addr"],
                                 "label": f"{curr['v_out'] / 100_000_000:.4f}".rstrip('0').rstrip('.') + " BTC",
@@ -264,19 +241,14 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
                                 "exchange": exch,
                                 "tags": tags
                                 }
-        #graph["edges"].append(edge)
-        g.add_edge(curr["tx_src"], curr["addr"], meta=edge )
+        graph.add_edge(curr["tx_src"], curr["addr"], meta=edge )
 
         if(curr["tx_dst"] and not exch):  
-            dag = is_dag(graph, curr["tx_dst"])
+            #dag = is_dag(graph, curr["tx_dst"])
+            dag = False
             if not dag : 
-                graph["nodes"].append({ 
-                    "id": curr["tx_dst"],
-                    "label": f"TX: {curr['tx_dst'][:8]}...",
-                    "type": "transaction",
-                    "DAG": False 
-                })
                 explore_tx(curr["tx_dst"], structure)
+
             edge = { "from": curr["addr"],
                                 "to": curr["tx_dst"],
                                 "label": f"{curr['v_inp'] / 100_000_000:.4f}".rstrip('0').rstrip('.') + " BTC",
@@ -285,11 +257,10 @@ def graph_from_nb_nodes(txid:str, n_nodes:int, structure:IterStructure, write=Fa
                                 "exchange": False,
                                 "tags": tags
                                 }
-            # si dag alors tx_dst existe deja dans le graphe on met juste l'arrete
-            #graph["edges"].append(edge)
-            g.add_edge(curr["addr"], curr["tx_dst"], meta=edge )
+
+            graph.add_edge(curr["addr"], curr["tx_dst"], meta=edge )
         
-    return g
+    return graph
 
 '''
 Parcoure les output d'une transaction et les ajoute pour le traitement dans la structure.

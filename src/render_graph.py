@@ -13,7 +13,7 @@ with open('../json/ransom_tags.json', 'r') as file:
 # Couleurs des noeuds
 DEFAULT_ADDR = '#0000ff'
 RANSOME_ADDR = "#ff0000"
-EXCHANGE_ADDR = "#0000"
+EXCHANGE_ADDR = "#000000"
 DEFAULT_TX = "#00ffbf"
 FIRST_TX = "#c002fa"
 DAG_TX = "#ff0000"

@@ -6,7 +6,9 @@ def main():
     txid = input("TXID : ").strip()
     if not txid:
         print("Erreur : Aucun identifiant de transaction saisi.")
-        txid = '87c6dffb5e103e24295a134d2449dccf15ac7a6147f19f2a39731cf121668108'
+        txid = 'e102fa789cd29ae5c249d17ef167a24a5c2c54f593aad8083a29d1233a3656b7' #35 btc
+        #txid = "c04f5862d5d9cd90a66470711e203d4b5dd87ddf489d67192a6577f81eaa7bf3" #dag + exch
+        #txid = "040a5996a3e0b2547d9301b225b4c246a06d8fdec67cfd15197a161fafa69811"
     # si vous voulez générer en fonction de profondeur mettez True sinon
     by_depth = False
     graph = None
@@ -20,7 +22,7 @@ def main():
 
     else:
         n = 5
-        iter = IterBFS()
+        iter = IterPriority(1)
         graph = graph_from_nb_nodes(txid, n, iter)
         # Le nom du html généré est raltif à la transaction et à la profondeur du graphe
         dst =   f"../html/graph_nb_{n}_{iter}_{txid[:5]}.html"

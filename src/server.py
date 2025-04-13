@@ -14,7 +14,9 @@ def get_parents_route():
     global graph, TX_SRC
     data = request.json
     node_id = data.get("node_id")
-    path_root = nx.shortest_path(graph,TX_SRC, node_id)
+    #path_root = nx.shortest_path(graph,TX_SRC, node_id)
+    path_root = list(nx.ancestors(graph, node_id))
+    path_root.append(node_id)
     return jsonify({"nodes": path_root})
 
 '''
