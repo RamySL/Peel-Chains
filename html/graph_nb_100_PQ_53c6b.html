@@ -1,0 +1,284 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 100vh;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+             #loadingBar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width: 100%;
+                 height: 100vh;
+                 background-color:rgba(200,200,200,0.8);
+                 -webkit-transition: all 0.5s ease;
+                 -moz-transition: all 0.5s ease;
+                 -ms-transition: all 0.5s ease;
+                 -o-transition: all 0.5s ease;
+                 transition: all 0.5s ease;
+                 opacity:1;
+             }
+
+             #bar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width:20px;
+                 height:20px;
+                 margin:auto auto auto auto;
+                 border-radius:11px;
+                 border:2px solid rgba(30,30,30,0.05);
+                 background: rgb(0, 173, 246); /* Old browsers */
+                 box-shadow: 2px 0px 4px rgba(0,0,0,0.4);
+             }
+
+             #border {
+                 position:absolute;
+                 top:10px;
+                 left:10px;
+                 width:500px;
+                 height:23px;
+                 margin:auto auto auto auto;
+                 box-shadow: 0px 0px 4px rgba(0,0,0,0.2);
+                 border-radius:10px;
+             }
+
+             #text {
+                 position:absolute;
+                 top:8px;
+                 left:530px;
+                 width:30px;
+                 height:50px;
+                 margin:auto auto auto auto;
+                 font-size:22px;
+                 color: #000000;
+             }
+
+             div.outerBorder {
+                 position:relative;
+                 top:400px;
+                 width:600px;
+                 height:44px;
+                 margin:auto auto auto auto;
+                 border:8px solid rgba(0,0,0,0.1);
+                 background: rgb(252,252,252); /* Old browsers */
+                 background: -moz-linear-gradient(top,  rgba(252,252,252,1) 0%, rgba(237,237,237,1) 100%); /* FF3.6+ */
+                 background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(252,252,252,1)), color-stop(100%,rgba(237,237,237,1))); /* Chrome,Safari4+ */
+                 background: -webkit-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Chrome10+,Safari5.1+ */
+                 background: -o-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Opera 11.10+ */
+                 background: -ms-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* IE10+ */
+                 background: linear-gradient(to bottom,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* W3C */
+                 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+                 border-radius:72px;
+                 box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+             }
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+            <div id="loadingBar">
+              <div class="outerBorder">
+                <div id="text">0%</div>
+                <div id="border">
+                  <div id="bar"></div>
+                </div>
+              </div>
+            </div>
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#c002fa", "id": "53c6bc2460e82d2338ecf37e906203eaaf893ecd42fb9458f1b70f677cb58091", "label": " ", "shape": "square", "title": "id/addr: 53c6bc2460e82d2338ecf37e906203eaaf893ecd42fb9458f1b70f677cb58091 \n tags:[] "}, {"color": "#0000ff", "id": "1H2z46WNKJuUbrvAZsuCmQaEQ6QeN2nzGS", "label": " ", "shape": "dot", "title": "id/addr: 1H2z46WNKJuUbrvAZsuCmQaEQ6QeN2nzGS \n tags:[] "}, {"color": "#00ffbf", "id": "7fd5dc3b3665844ab036a680fe2b556b9d0ff7c88b10ed4019308b3d364ac585", "label": " ", "shape": "square", "title": "id/addr: 7fd5dc3b3665844ab036a680fe2b556b9d0ff7c88b10ed4019308b3d364ac585 \n tags:[] "}, {"color": "#0000ff", "id": "13SqVocpNHyCRAiQtu288cbLVTfzjZiWZK", "label": " ", "shape": "dot", "title": "id/addr: 13SqVocpNHyCRAiQtu288cbLVTfzjZiWZK \n tags:[] "}, {"color": "#0000ff", "id": "bc1q8d2s23g2v82xt29jsvnvv7y89k2y43at0llvw2", "label": " ", "shape": "dot", "title": "id/addr: bc1q8d2s23g2v82xt29jsvnvv7y89k2y43at0llvw2 \n tags:[] "}, {"color": "#00ffbf", "id": "a521c085d9b9e8f3887a96f635ed05dbd18c192bdec5628483843b0d1f1e47a8", "label": " ", "shape": "square", "title": "id/addr: a521c085d9b9e8f3887a96f635ed05dbd18c192bdec5628483843b0d1f1e47a8 \n tags:[] "}, {"color": "#0000ff", "id": "1Gi3a4DesMxuNiEvhd9ToroCWQqP3ZE14j", "label": " ", "shape": "dot", "title": "id/addr: 1Gi3a4DesMxuNiEvhd9ToroCWQqP3ZE14j \n tags:[] "}, {"color": "#0000ff", "id": "bc1qlhzr7y3whlhfccdx46g2l2uyftdkmnddyngxnv", "label": " ", "shape": "dot", "title": "id/addr: bc1qlhzr7y3whlhfccdx46g2l2uyftdkmnddyngxnv \n tags:[] "}, {"color": "#00ffbf", "id": "c371055c54bf832e9a8ebb18692e84ba66f1bb9a37ac9f83d640d21d81baffad", "label": " ", "shape": "square", "title": "id/addr: c371055c54bf832e9a8ebb18692e84ba66f1bb9a37ac9f83d640d21d81baffad \n tags:[] "}, {"color": "#0000ff", "id": "1FzYPNo6p4jjeFG8Ta1HybNvWow5wPgQAY", "label": " ", "shape": "dot", "title": "id/addr: 1FzYPNo6p4jjeFG8Ta1HybNvWow5wPgQAY \n tags:[] "}, {"color": "#00ffbf", "id": "b8117c4452df0d278db46df6eb7fdfdd8220821cb63388c3e1ca83dabbbc1762", "label": " ", "shape": "square", "title": "id/addr: b8117c4452df0d278db46df6eb7fdfdd8220821cb63388c3e1ca83dabbbc1762 \n tags:[] "}, {"color": "#0000ff", "id": "19vAtnr5PYtFJ61JCaKksQEgwgAsGwaK8n", "label": " ", "shape": "dot", "title": "id/addr: 19vAtnr5PYtFJ61JCaKksQEgwgAsGwaK8n \n tags:[] "}, {"color": "#00ffbf", "id": "fbcbd57f3805429fdb6b5cdc81205be1d8d62c63a3d164fc8dab1050cd6fceaa", "label": " ", "shape": "square", "title": "id/addr: fbcbd57f3805429fdb6b5cdc81205be1d8d62c63a3d164fc8dab1050cd6fceaa \n tags:[] "}, {"color": "#0000ff", "id": "142L2XTu8u98cfwXS8wqyYKFB4JjrJ78WY", "label": " ", "shape": "dot", "title": "id/addr: 142L2XTu8u98cfwXS8wqyYKFB4JjrJ78WY \n tags:[] "}, {"color": "#00ffbf", "id": "c09eeebfb7ed398d4a65d98c66ca79e34ea9877ef74671510026945878fb6b66", "label": " ", "shape": "square", "title": "id/addr: c09eeebfb7ed398d4a65d98c66ca79e34ea9877ef74671510026945878fb6b66 \n tags:[] "}, {"color": "#0000ff", "id": "1MBNQKnxUozyJmrNh6Hg6dY971sD9Wk9U1", "label": " ", "shape": "dot", "title": "id/addr: 1MBNQKnxUozyJmrNh6Hg6dY971sD9Wk9U1 \n tags:[] "}, {"color": "#0000ff", "id": "1LBDCWA573X7xMfRAWTRdGDY9pDF6dXG2B", "label": " ", "shape": "dot", "title": "id/addr: 1LBDCWA573X7xMfRAWTRdGDY9pDF6dXG2B \n tags:[] "}, {"color": "#00ffbf", "id": "897991187072aed0331a07405628bcf59a1d1c856657a033871ab93697be6c3f", "label": " ", "shape": "square", "title": "id/addr: 897991187072aed0331a07405628bcf59a1d1c856657a033871ab93697be6c3f \n tags:[] "}, {"color": "#0000ff", "id": "39ChjgGzMZAUzP88LB6g1k4jEmka5G8VFz", "label": " ", "shape": "dot", "title": "id/addr: 39ChjgGzMZAUzP88LB6g1k4jEmka5G8VFz \n tags:[] "}, {"color": "#00ffbf", "id": "86499f4bc258f04c146bde28d01f1eb57eb1cc1ac299d1bf2a464d473a8b51d8", "label": " ", "shape": "square", "title": "id/addr: 86499f4bc258f04c146bde28d01f1eb57eb1cc1ac299d1bf2a464d473a8b51d8 \n tags:[] "}, {"color": "#0000ff", "id": "3A99TqWrJ1cVDWKnTyqjAGXMcUFa3Rt2TZ", "label": " ", "shape": "dot", "title": "id/addr: 3A99TqWrJ1cVDWKnTyqjAGXMcUFa3Rt2TZ \n tags:[] "}, {"color": "#0000ff", "id": "1FVPGuSQVSr87ZPpnucXbNGFVx7ULgwYyT", "label": " ", "shape": "dot", "title": "id/addr: 1FVPGuSQVSr87ZPpnucXbNGFVx7ULgwYyT \n tags:[] "}, {"color": "#00ffbf", "id": "cb3955e368f09b62459dec0aec428fad591920477eb59a5efa03445cbaceaa50", "label": " ", "shape": "square", "title": "id/addr: cb3955e368f09b62459dec0aec428fad591920477eb59a5efa03445cbaceaa50 \n tags:[] "}, {"color": "#000000", "id": "32akBMy2v39TdV6syzz7LzkGWGeAFruS6P", "label": " ", "shape": "dot", "title": "id/addr: 32akBMy2v39TdV6syzz7LzkGWGeAFruS6P \n tags:[\u0027Centralized Exchange\u0027] "}, {"color": "#00ffbf", "id": "9399af674f805e79997045b9fa4e4e8858126307a59f4d42400219440d46ffb1", "label": " ", "shape": "square", "title": "id/addr: 9399af674f805e79997045b9fa4e4e8858126307a59f4d42400219440d46ffb1 \n tags:[] "}, {"color": "#0000ff", "id": "15X27JToPDxxhxx7PUAbmaVTFNsKtJtSJ1", "label": " ", "shape": "dot", "title": "id/addr: 15X27JToPDxxhxx7PUAbmaVTFNsKtJtSJ1 \n tags:[] "}, {"color": "#00ffbf", "id": "2af738203322c84ab869e3290e84dbba3db4d599e389666b8437e2982cc4d72f", "label": " ", "shape": "square", "title": "id/addr: 2af738203322c84ab869e3290e84dbba3db4d599e389666b8437e2982cc4d72f \n tags:[] "}, {"color": "#0000ff", "id": "1D2yJGWZxCpXKifYqfraic9TgkZC1jxCRs", "label": " ", "shape": "dot", "title": "id/addr: 1D2yJGWZxCpXKifYqfraic9TgkZC1jxCRs \n tags:[] "}, {"color": "#00ffbf", "id": "bcba127756c5982d318c782f0dd0e85d861d4470750da326c5a836916358fa12", "label": " ", "shape": "square", "title": "id/addr: bcba127756c5982d318c782f0dd0e85d861d4470750da326c5a836916358fa12 \n tags:[] "}, {"color": "#0000ff", "id": "14ScwMNdQqwSnvuHBf7yWYVXpYt9omWwRN", "label": " ", "shape": "dot", "title": "id/addr: 14ScwMNdQqwSnvuHBf7yWYVXpYt9omWwRN \n tags:[] "}, {"color": "#00ffbf", "id": "4d609470a4ab1264dae6c781f2043d4a68f0f863f66e7d17824d0e98539c6eda", "label": " ", "shape": "square", "title": "id/addr: 4d609470a4ab1264dae6c781f2043d4a68f0f863f66e7d17824d0e98539c6eda \n tags:[] "}, {"color": "#0000ff", "id": "12r8KdUS12QCND8jMTNMh2n8QF9q3f5JxY", "label": " ", "shape": "dot", "title": "id/addr: 12r8KdUS12QCND8jMTNMh2n8QF9q3f5JxY \n tags:[] "}, {"color": "#00ffbf", "id": "12e513b73db66a9478c4fcb9fdb64cbdc586b75bff97772013e726f0ef53ecd2", "label": " ", "shape": "square", "title": "id/addr: 12e513b73db66a9478c4fcb9fdb64cbdc586b75bff97772013e726f0ef53ecd2 \n tags:[] "}, {"color": "#0000ff", "id": "1Ji14xdnJMwguyBrv44VRwqEXTyxesQs7L", "label": " ", "shape": "dot", "title": "id/addr: 1Ji14xdnJMwguyBrv44VRwqEXTyxesQs7L \n tags:[] "}, {"color": "#00ffbf", "id": "3b56c0710eb610eaaf6a3dfbe5426ac7942bddc096d3c562af6aa9aa5fda5ea7", "label": " ", "shape": "square", "title": "id/addr: 3b56c0710eb610eaaf6a3dfbe5426ac7942bddc096d3c562af6aa9aa5fda5ea7 \n tags:[] "}, {"color": "#0000ff", "id": "16V3PFPyBwQsv1QYxCiu63oNKksmenMF4Y", "label": " ", "shape": "dot", "title": "id/addr: 16V3PFPyBwQsv1QYxCiu63oNKksmenMF4Y \n tags:[] "}, {"color": "#00ffbf", "id": "fbffd56b3d2d76a6ab6bda22836c11cd3181efbf4aa2fc5b5725e323b2becdfb", "label": " ", "shape": "square", "title": "id/addr: fbffd56b3d2d76a6ab6bda22836c11cd3181efbf4aa2fc5b5725e323b2becdfb \n tags:[] "}, {"color": "#0000ff", "id": "1FLPb5CCR62jNK1o3aZFyvsgsXZmVVH1nj", "label": " ", "shape": "dot", "title": "id/addr: 1FLPb5CCR62jNK1o3aZFyvsgsXZmVVH1nj \n tags:[] "}, {"color": "#00ffbf", "id": "a598768d6b1b673d5ddbec6dba45f48d53ea367ae400e28fa4fc10a00a9d9326", "label": " ", "shape": "square", "title": "id/addr: a598768d6b1b673d5ddbec6dba45f48d53ea367ae400e28fa4fc10a00a9d9326 \n tags:[] "}, {"color": "#0000ff", "id": "12aHoLYuEAsfuv6MGwgWHsKxcu2rDMsSt5", "label": " ", "shape": "dot", "title": "id/addr: 12aHoLYuEAsfuv6MGwgWHsKxcu2rDMsSt5 \n tags:[] "}, {"color": "#00ffbf", "id": "7fd6f37189b369954b73e7b1ff5acb775466333b4671dedce8dd2fcb00b1652f", "label": " ", "shape": "square", "title": "id/addr: 7fd6f37189b369954b73e7b1ff5acb775466333b4671dedce8dd2fcb00b1652f \n tags:[] "}, {"color": "#0000ff", "id": "1J86npfPeiYf783h4kS4xNxvCUcwUgfXuo", "label": " ", "shape": "dot", "title": "id/addr: 1J86npfPeiYf783h4kS4xNxvCUcwUgfXuo \n tags:[] "}, {"color": "#00ffbf", "id": "4bd9e244068c99b29b598075a3e5ec71c8cf476b65444dccb1dce8a08f71bcec", "label": " ", "shape": "square", "title": "id/addr: 4bd9e244068c99b29b598075a3e5ec71c8cf476b65444dccb1dce8a08f71bcec \n tags:[] "}, {"color": "#0000ff", "id": "16uapq1pfsWdTerioJG962YyVk1rN4Ahi1", "label": " ", "shape": "dot", "title": "id/addr: 16uapq1pfsWdTerioJG962YyVk1rN4Ahi1 \n tags:[] "}, {"color": "#00ffbf", "id": "44de61881acd5a3127d4c925e539b020cb63af2f201cfca72ed96adc5f77c730", "label": " ", "shape": "square", "title": "id/addr: 44de61881acd5a3127d4c925e539b020cb63af2f201cfca72ed96adc5f77c730 \n tags:[] "}, {"color": "#0000ff", "id": "1Lp8FH1qL3rxppJqn3NRBvLemUR6D4rS7e", "label": " ", "shape": "dot", "title": "id/addr: 1Lp8FH1qL3rxppJqn3NRBvLemUR6D4rS7e \n tags:[] "}, {"color": "#00ffbf", "id": "caffe1315a58a163508100b0894f5062da61cfbc32d49e121712c6593d464826", "label": " ", "shape": "square", "title": "id/addr: caffe1315a58a163508100b0894f5062da61cfbc32d49e121712c6593d464826 \n tags:[] "}, {"color": "#00ffbf", "id": "ae9b8053e55bf18ec9d1b045f12869939bd64b06b7612065ae9186ad3e9f11ce", "label": " ", "shape": "square", "title": "id/addr: ae9b8053e55bf18ec9d1b045f12869939bd64b06b7612065ae9186ad3e9f11ce \n tags:[] "}, {"color": "#00ffbf", "id": "a5ca64fbf493974e7f69f7a6b337192174a8d3b76e77e496393df7447bd8365c", "label": " ", "shape": "square", "title": "id/addr: a5ca64fbf493974e7f69f7a6b337192174a8d3b76e77e496393df7447bd8365c \n tags:[] "}, {"color": "#00ffbf", "id": "6f119e9c33223b6c48266e72e818de77eeb548a6994e35adb360c1b92fd8ae68", "label": " ", "shape": "square", "title": "id/addr: 6f119e9c33223b6c48266e72e818de77eeb548a6994e35adb360c1b92fd8ae68 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qadh3x0p2svjyeqmyda8deqcu6j877d6tktpyk8", "label": " ", "shape": "dot", "title": "id/addr: bc1qadh3x0p2svjyeqmyda8deqcu6j877d6tktpyk8 \n tags:[] "}, {"color": "#00ffbf", "id": "2aa8c260366035248defa6f8240e7184aac4405bc9b1b3d6d4cdbb0dd37c3d42", "label": " ", "shape": "square", "title": "id/addr: 2aa8c260366035248defa6f8240e7184aac4405bc9b1b3d6d4cdbb0dd37c3d42 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qlrve3u5ee5v2v6vpkxlpzwkde2fqf50y7u0e20", "label": " ", "shape": "dot", "title": "id/addr: bc1qlrve3u5ee5v2v6vpkxlpzwkde2fqf50y7u0e20 \n tags:[] "}, {"color": "#0000ff", "id": "bc1q8u0u8t2ef0wf3vrf8mf9qr7vkkccenhhta7suw", "label": " ", "shape": "dot", "title": "id/addr: bc1q8u0u8t2ef0wf3vrf8mf9qr7vkkccenhhta7suw \n tags:[] "}, {"color": "#00ffbf", "id": "7caf8e9843d97f6bfef449e034ad4b24e769fab2bfee32a40a567fbee3510027", "label": " ", "shape": "square", "title": "id/addr: 7caf8e9843d97f6bfef449e034ad4b24e769fab2bfee32a40a567fbee3510027 \n tags:[] "}, {"color": "#0000ff", "id": "bc1q4cwaz7cw06dlestmv6dyqllwvje60lzpapzd34", "label": " ", "shape": "dot", "title": "id/addr: bc1q4cwaz7cw06dlestmv6dyqllwvje60lzpapzd34 \n tags:[] "}, {"color": "#00ffbf", "id": "54be1015aca97128389fb968b8c4dc00d1a60eb825036c97484f158a31988e4e", "label": " ", "shape": "square", "title": "id/addr: 54be1015aca97128389fb968b8c4dc00d1a60eb825036c97484f158a31988e4e \n tags:[] "}, {"color": "#0000ff", "id": "bc1qzdn3lt7dcmmef3gplxgekj905tk68z80vyptwt", "label": " ", "shape": "dot", "title": "id/addr: bc1qzdn3lt7dcmmef3gplxgekj905tk68z80vyptwt \n tags:[] "}, {"color": "#00ffbf", "id": "9c116c98555927897a3001bfe79fc170036b3119058b6d065481500eada93089", "label": " ", "shape": "square", "title": "id/addr: 9c116c98555927897a3001bfe79fc170036b3119058b6d065481500eada93089 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qpdxflrcpsmx4pddymwdem0dapeuamf4qh9jrdl", "label": " ", "shape": "dot", "title": "id/addr: bc1qpdxflrcpsmx4pddymwdem0dapeuamf4qh9jrdl \n tags:[] "}, {"color": "#00ffbf", "id": "5e23230807c9dbefd7e8736837949d9ea568012231a6ece3795645bee8b0b119", "label": " ", "shape": "square", "title": "id/addr: 5e23230807c9dbefd7e8736837949d9ea568012231a6ece3795645bee8b0b119 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qcrp40kk8gw8qghh3hu9h0jsez42zv6sv964zla", "label": " ", "shape": "dot", "title": "id/addr: bc1qcrp40kk8gw8qghh3hu9h0jsez42zv6sv964zla \n tags:[] "}, {"color": "#00ffbf", "id": "df7a598a64403c11075896f30253cd7f3f0162a0022c21cf935de91688e93129", "label": " ", "shape": "square", "title": "id/addr: df7a598a64403c11075896f30253cd7f3f0162a0022c21cf935de91688e93129 \n tags:[] "}, {"color": "#00ffbf", "id": "bfa0b5bdbcab3ae3ae200a895781cae88d869edec8eff99a6608b7698474cbd9", "label": " ", "shape": "square", "title": "id/addr: bfa0b5bdbcab3ae3ae200a895781cae88d869edec8eff99a6608b7698474cbd9 \n tags:[] "}, {"color": "#0000ff", "id": "bc1q7fffun3u7dhn0t2mcc0mtujw8xmm5wd3aa7nv7", "label": " ", "shape": "dot", "title": "id/addr: bc1q7fffun3u7dhn0t2mcc0mtujw8xmm5wd3aa7nv7 \n tags:[] "}, {"color": "#00ffbf", "id": "7bd09e5fccf5b34cdf49d1ffdb00dd68e48bc88437df3dde10d5f079bad0da7f", "label": " ", "shape": "square", "title": "id/addr: 7bd09e5fccf5b34cdf49d1ffdb00dd68e48bc88437df3dde10d5f079bad0da7f \n tags:[] "}, {"color": "#0000ff", "id": "bc1qhzcn45jwjz7723dktkch8g4470kgdxdm2vfha9", "label": " ", "shape": "dot", "title": "id/addr: bc1qhzcn45jwjz7723dktkch8g4470kgdxdm2vfha9 \n tags:[] "}, {"color": "#00ffbf", "id": "36efc26a173e1083106c387eeac0a11a4ad071bd3559b7596144db29c1478aba", "label": " ", "shape": "square", "title": "id/addr: 36efc26a173e1083106c387eeac0a11a4ad071bd3559b7596144db29c1478aba \n tags:[] "}, {"color": "#0000ff", "id": "bc1q29mcdvxymrcpuzmewxry33rvetm40ls6etf7wd", "label": " ", "shape": "dot", "title": "id/addr: bc1q29mcdvxymrcpuzmewxry33rvetm40ls6etf7wd \n tags:[] "}, {"color": "#00ffbf", "id": "f42abc7c64d84dda47443a79af13290484172004abb527417581706ffeb1d048", "label": " ", "shape": "square", "title": "id/addr: f42abc7c64d84dda47443a79af13290484172004abb527417581706ffeb1d048 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qyqhjd84jk84asfuad9zecwjzv8tfv7yzucsxje", "label": " ", "shape": "dot", "title": "id/addr: bc1qyqhjd84jk84asfuad9zecwjzv8tfv7yzucsxje \n tags:[] "}, {"color": "#0000ff", "id": "bc1qkrcsg4ux4rcphk38kspssqwtce0ztezxmywxhc", "label": " ", "shape": "dot", "title": "id/addr: bc1qkrcsg4ux4rcphk38kspssqwtce0ztezxmywxhc \n tags:[] "}, {"color": "#00ffbf", "id": "dd2f56f419a567cf49996aa178982ca8ca1d57db857291b906a35d5d47b3972e", "label": " ", "shape": "square", "title": "id/addr: dd2f56f419a567cf49996aa178982ca8ca1d57db857291b906a35d5d47b3972e \n tags:[] "}, {"color": "#0000ff", "id": "bc1qmg0vtwzcpsexymcf7wm65du5s4mgcw2nn8zead", "label": " ", "shape": "dot", "title": "id/addr: bc1qmg0vtwzcpsexymcf7wm65du5s4mgcw2nn8zead \n tags:[] "}, {"color": "#00ffbf", "id": "5cac86f15187f1b1c0f9c38d0ce14e2266493d524a41d7b531f2e18440bbdf93", "label": " ", "shape": "square", "title": "id/addr: 5cac86f15187f1b1c0f9c38d0ce14e2266493d524a41d7b531f2e18440bbdf93 \n tags:[] "}, {"color": "#00ffbf", "id": "1834bf62008556eff497a3ddadd3bf3c4f634f19f8bbdebcba3b960a6774a03e", "label": " ", "shape": "square", "title": "id/addr: 1834bf62008556eff497a3ddadd3bf3c4f634f19f8bbdebcba3b960a6774a03e \n tags:[] "}, {"color": "#0000ff", "id": "bc1qh7jtnkx8wnwcv4jdgw7p3fh5zwngexm87e546k", "label": " ", "shape": "dot", "title": "id/addr: bc1qh7jtnkx8wnwcv4jdgw7p3fh5zwngexm87e546k \n tags:[] "}, {"color": "#00ffbf", "id": "38854b6b3b59bafa817138d573cbbd30d08f7a695233f41603ae808133a192a5", "label": " ", "shape": "square", "title": "id/addr: 38854b6b3b59bafa817138d573cbbd30d08f7a695233f41603ae808133a192a5 \n tags:[] "}, {"color": "#00ffbf", "id": "b00d02d2d163b77796a7dabc307cd16606ead60533b1334f993225d77d7e733f", "label": " ", "shape": "square", "title": "id/addr: b00d02d2d163b77796a7dabc307cd16606ead60533b1334f993225d77d7e733f \n tags:[] "}, {"color": "#0000ff", "id": "bc1qdhfdn9phlshxat6cdtdqtv7edrnet8sgcyvkf3", "label": " ", "shape": "dot", "title": "id/addr: bc1qdhfdn9phlshxat6cdtdqtv7edrnet8sgcyvkf3 \n tags:[] "}, {"color": "#00ffbf", "id": "861fd0b55e64bee6b074dcb67464a609dfd3ef95f04733303f1351b4c7419944", "label": " ", "shape": "square", "title": "id/addr: 861fd0b55e64bee6b074dcb67464a609dfd3ef95f04733303f1351b4c7419944 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qx8h76mjnv3pdl60tv7ev85fld86k4cj87edpnr", "label": " ", "shape": "dot", "title": "id/addr: bc1qx8h76mjnv3pdl60tv7ev85fld86k4cj87edpnr \n tags:[] "}, {"color": "#0000ff", "id": "bc1qgn85lp7pd874nj4hp94mmm2mdl44kqtskte3dw", "label": " ", "shape": "dot", "title": "id/addr: bc1qgn85lp7pd874nj4hp94mmm2mdl44kqtskte3dw \n tags:[] "}, {"color": "#00ffbf", "id": "9ea5f200cb59efad42e25708229b9ce5b148836ae959ca23c18cf078da5b7765", "label": " ", "shape": "square", "title": "id/addr: 9ea5f200cb59efad42e25708229b9ce5b148836ae959ca23c18cf078da5b7765 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qzk6yv3uhmq2yqdya4v4fshzgzttl03emcf8atl", "label": " ", "shape": "dot", "title": "id/addr: bc1qzk6yv3uhmq2yqdya4v4fshzgzttl03emcf8atl \n tags:[] "}, {"color": "#00ffbf", "id": "a061b35b7218ea0c0fef88a76237937cfb74a25293cf2ad3b3e33db7a22fd813", "label": " ", "shape": "square", "title": "id/addr: a061b35b7218ea0c0fef88a76237937cfb74a25293cf2ad3b3e33db7a22fd813 \n tags:[] "}, {"color": "#00ffbf", "id": "4b2780250ed8eb89a3722c6ec95834e5b9a34d12d23a32aa10955c5a24d29774", "label": " ", "shape": "square", "title": "id/addr: 4b2780250ed8eb89a3722c6ec95834e5b9a34d12d23a32aa10955c5a24d29774 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qzqp68y576uwqkqtuf9z4pff33tm2qgn2fsaua0", "label": " ", "shape": "dot", "title": "id/addr: bc1qzqp68y576uwqkqtuf9z4pff33tm2qgn2fsaua0 \n tags:[] "}, {"color": "#00ffbf", "id": "49d39ce10a43d977e07330c72afe30ee586be703107195ac2c5ad68a73b0bd75", "label": " ", "shape": "square", "title": "id/addr: 49d39ce10a43d977e07330c72afe30ee586be703107195ac2c5ad68a73b0bd75 \n tags:[] "}, {"color": "#0000ff", "id": "bc1quqpjvcq70mdnwhaxtzp5zycxea5w0hazt49fhy", "label": " ", "shape": "dot", "title": "id/addr: bc1quqpjvcq70mdnwhaxtzp5zycxea5w0hazt49fhy \n tags:[] "}, {"color": "#00ffbf", "id": "5598ed98657d85922db00ef522015b8cc07e8b8b5831f5518f28485427b2978a", "label": " ", "shape": "square", "title": "id/addr: 5598ed98657d85922db00ef522015b8cc07e8b8b5831f5518f28485427b2978a \n tags:[] "}, {"color": "#0000ff", "id": "bc1qnwv3q8w3ycqr6hf8vavf8wkcy3grz0hzqeh3hr", "label": " ", "shape": "dot", "title": "id/addr: bc1qnwv3q8w3ycqr6hf8vavf8wkcy3grz0hzqeh3hr \n tags:[] "}, {"color": "#00ffbf", "id": "44b1f1fd6899aa9d8a4e3d015e5a4e594282cd8ad28dd1d43b0058804e386253", "label": " ", "shape": "square", "title": "id/addr: 44b1f1fd6899aa9d8a4e3d015e5a4e594282cd8ad28dd1d43b0058804e386253 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qmvzfdw2he3uka204lkke4zdffqt4dd7hp6cluh", "label": " ", "shape": "dot", "title": "id/addr: bc1qmvzfdw2he3uka204lkke4zdffqt4dd7hp6cluh \n tags:[] "}, {"color": "#00ffbf", "id": "66c85096a0711a9491bce76dad854b858db6d7a93250b576011357cfdb0a7b89", "label": " ", "shape": "square", "title": "id/addr: 66c85096a0711a9491bce76dad854b858db6d7a93250b576011357cfdb0a7b89 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qfxxsfvh9jd4ycyfkge64lugapswq0nysm6rxfn", "label": " ", "shape": "dot", "title": "id/addr: bc1qfxxsfvh9jd4ycyfkge64lugapswq0nysm6rxfn \n tags:[] "}, {"color": "#00ffbf", "id": "5d1032d7ffb935ffe4994c6fc0c341f138aed7ff62911e0386de12e9929d0a7e", "label": " ", "shape": "square", "title": "id/addr: 5d1032d7ffb935ffe4994c6fc0c341f138aed7ff62911e0386de12e9929d0a7e \n tags:[] "}, {"color": "#0000ff", "id": "bc1qh75pheqqntvu73ud28q5r6r49z6husffy6tzht", "label": " ", "shape": "dot", "title": "id/addr: bc1qh75pheqqntvu73ud28q5r6r49z6husffy6tzht \n tags:[] "}, {"color": "#00ffbf", "id": "2eb961f69decca4d06f522be5728aa7cb119b666ec6b0c2ebe78f12ec00e00f9", "label": " ", "shape": "square", "title": "id/addr: 2eb961f69decca4d06f522be5728aa7cb119b666ec6b0c2ebe78f12ec00e00f9 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qgjerj2rrhg3mxsh9wsr3h69zq2wxz09cdjrla2", "label": " ", "shape": "dot", "title": "id/addr: bc1qgjerj2rrhg3mxsh9wsr3h69zq2wxz09cdjrla2 \n tags:[] "}, {"color": "#00ffbf", "id": "ced8305e937e0bae11f9c998946e01d7355acfe80e180946b7c06d2734b9ad9f", "label": " ", "shape": "square", "title": "id/addr: ced8305e937e0bae11f9c998946e01d7355acfe80e180946b7c06d2734b9ad9f \n tags:[] "}, {"color": "#0000ff", "id": "bc1q544vq2qh0g75cf9ap662d9p38yqv7dlly6vgll", "label": " ", "shape": "dot", "title": "id/addr: bc1q544vq2qh0g75cf9ap662d9p38yqv7dlly6vgll \n tags:[] "}, {"color": "#00ffbf", "id": "e7cc56c60c3e6af60694ff162a2303ccd1677cd1c96c3aebe57de8cb36da9110", "label": " ", "shape": "square", "title": "id/addr: e7cc56c60c3e6af60694ff162a2303ccd1677cd1c96c3aebe57de8cb36da9110 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qzr0y2fvyy7aylqalrwtmhtshekv6899x6y623c", "label": " ", "shape": "dot", "title": "id/addr: bc1qzr0y2fvyy7aylqalrwtmhtshekv6899x6y623c \n tags:[] "}, {"color": "#00ffbf", "id": "2499dd4581dc22e4940f240d4f313374f9bbaab08aa09ffdf66941255ab73926", "label": " ", "shape": "square", "title": "id/addr: 2499dd4581dc22e4940f240d4f313374f9bbaab08aa09ffdf66941255ab73926 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qw8cr9z2ruul0enag07qf6qu2tg2rygsr60d4s9", "label": " ", "shape": "dot", "title": "id/addr: bc1qw8cr9z2ruul0enag07qf6qu2tg2rygsr60d4s9 \n tags:[] "}, {"color": "#00ffbf", "id": "0e3a97be292cd0fdea4a9d403cdf56da042872b32f849b47e67db0e21b2cd1e0", "label": " ", "shape": "square", "title": "id/addr: 0e3a97be292cd0fdea4a9d403cdf56da042872b32f849b47e67db0e21b2cd1e0 \n tags:[] "}, {"color": "#0000ff", "id": "bc1q84v7v6zuxwgccal506ye0tsn3dkdzm6u8qf4wn", "label": " ", "shape": "dot", "title": "id/addr: bc1q84v7v6zuxwgccal506ye0tsn3dkdzm6u8qf4wn \n tags:[] "}, {"color": "#00ffbf", "id": "22d1612060fcb19589dddfecbe933cb27f99dde65e19b587669decc40b86f3fb", "label": " ", "shape": "square", "title": "id/addr: 22d1612060fcb19589dddfecbe933cb27f99dde65e19b587669decc40b86f3fb \n tags:[] "}, {"color": "#0000ff", "id": "bc1qm5uuutgcfd6fepuefgg6tpmx4x9qpeytt364zh", "label": " ", "shape": "dot", "title": "id/addr: bc1qm5uuutgcfd6fepuefgg6tpmx4x9qpeytt364zh \n tags:[] "}, {"color": "#00ffbf", "id": "a80c16e85bfa09e08b66a68b4649d803092022c4be632b51c560578071b32cff", "label": " ", "shape": "square", "title": "id/addr: a80c16e85bfa09e08b66a68b4649d803092022c4be632b51c560578071b32cff \n tags:[] "}, {"color": "#0000ff", "id": "bc1q0mla0ndn4wajd8gjn6kh4pz5wmtkkzygud2apv", "label": " ", "shape": "dot", "title": "id/addr: bc1q0mla0ndn4wajd8gjn6kh4pz5wmtkkzygud2apv \n tags:[] "}, {"color": "#00ffbf", "id": "53720082a85a46702558a4a5549195d403c190bfef1120f5f98ab40dbbd0e292", "label": " ", "shape": "square", "title": "id/addr: 53720082a85a46702558a4a5549195d403c190bfef1120f5f98ab40dbbd0e292 \n tags:[] "}, {"color": "#0000ff", "id": "bc1q3hsjudd7h6u2egmlr5kquwh56wavaat3ssvv62", "label": " ", "shape": "dot", "title": "id/addr: bc1q3hsjudd7h6u2egmlr5kquwh56wavaat3ssvv62 \n tags:[] "}, {"color": "#00ffbf", "id": "42d05e4c2a2fb4e02d2a8dca1a82c7b5202f288a6cc292fa17964c60f68ecac4", "label": " ", "shape": "square", "title": "id/addr: 42d05e4c2a2fb4e02d2a8dca1a82c7b5202f288a6cc292fa17964c60f68ecac4 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qagd7c6m5lz2dqkf0hmxq20z606ll5xrwcgevafl9hv9z46vlg58s7tg5c7", "label": " ", "shape": "dot", "title": "id/addr: bc1qagd7c6m5lz2dqkf0hmxq20z606ll5xrwcgevafl9hv9z46vlg58s7tg5c7 \n tags:[] "}, {"color": "#0000ff", "id": "bc1q0g9mltdrguf6cmt2sqht9xhgg5y5307w7fkdy6", "label": " ", "shape": "dot", "title": "id/addr: bc1q0g9mltdrguf6cmt2sqht9xhgg5y5307w7fkdy6 \n tags:[] "}, {"color": "#00ffbf", "id": "e9771e403e811087263d23594dcd78fd7e87209b73bd613e81b56aeb143ca054", "label": " ", "shape": "square", "title": "id/addr: e9771e403e811087263d23594dcd78fd7e87209b73bd613e81b56aeb143ca054 \n tags:[] "}, {"color": "#00ffbf", "id": "a0a6850260794f2ab6de2676b73a5ecdc10b719e1944e28eb67f713c7e7c3454", "label": " ", "shape": "square", "title": "id/addr: a0a6850260794f2ab6de2676b73a5ecdc10b719e1944e28eb67f713c7e7c3454 \n tags:[] "}, {"color": "#0000ff", "id": "bc1q4jus5ldskzw3wauvdd7ng3ds3z87hfurglw9mf", "label": " ", "shape": "dot", "title": "id/addr: bc1q4jus5ldskzw3wauvdd7ng3ds3z87hfurglw9mf \n tags:[] "}, {"color": "#00ffbf", "id": "f5225af6cd99bf9101cd18dfec220aa99501d0df11ec77f565b6e5179f71e941", "label": " ", "shape": "square", "title": "id/addr: f5225af6cd99bf9101cd18dfec220aa99501d0df11ec77f565b6e5179f71e941 \n tags:[] "}, {"color": "#0000ff", "id": "bc1qswcn3ft25k8evg4qqmk02d8vlp7kr4sh3tg0pm", "label": " ", "shape": "dot", "title": "id/addr: bc1qswcn3ft25k8evg4qqmk02d8vlp7kr4sh3tg0pm \n tags:[] "}, {"color": "#00ffbf", "id": "cedf3ac81688399d7a72275d1abd8e57f43cfc3b7f9b59c7be1c0c03face1361", "label": " ", "shape": "square", "title": "id/addr: cedf3ac81688399d7a72275d1abd8e57f43cfc3b7f9b59c7be1c0c03face1361 \n tags:[] "}]);
+                  edges = new vis.DataSet([{"arrows": "to", "from": "53c6bc2460e82d2338ecf37e906203eaaf893ecd42fb9458f1b70f677cb58091", "label": "15.9208 BTC", "to": "1H2z46WNKJuUbrvAZsuCmQaEQ6QeN2nzGS"}, {"arrows": "to", "color": "#000000", "from": "1H2z46WNKJuUbrvAZsuCmQaEQ6QeN2nzGS", "label": "15.9208 BTC", "to": "7fd5dc3b3665844ab036a680fe2b556b9d0ff7c88b10ed4019308b3d364ac585"}, {"arrows": "to", "from": "7fd5dc3b3665844ab036a680fe2b556b9d0ff7c88b10ed4019308b3d364ac585", "label": "14.1751 BTC", "to": "13SqVocpNHyCRAiQtu288cbLVTfzjZiWZK"}, {"arrows": "to", "from": "7fd5dc3b3665844ab036a680fe2b556b9d0ff7c88b10ed4019308b3d364ac585", "label": "1.7456 BTC", "to": "bc1q8d2s23g2v82xt29jsvnvv7y89k2y43at0llvw2"}, {"arrows": "to", "color": "#000000", "from": "13SqVocpNHyCRAiQtu288cbLVTfzjZiWZK", "label": "14.1751 BTC", "to": "a521c085d9b9e8f3887a96f635ed05dbd18c192bdec5628483843b0d1f1e47a8"}, {"arrows": "to", "from": "a521c085d9b9e8f3887a96f635ed05dbd18c192bdec5628483843b0d1f1e47a8", "label": "12.4293 BTC", "to": "1Gi3a4DesMxuNiEvhd9ToroCWQqP3ZE14j"}, {"arrows": "to", "from": "a521c085d9b9e8f3887a96f635ed05dbd18c192bdec5628483843b0d1f1e47a8", "label": "1.7456 BTC", "to": "bc1qlhzr7y3whlhfccdx46g2l2uyftdkmnddyngxnv"}, {"arrows": "to", "color": "#000000", "from": "1Gi3a4DesMxuNiEvhd9ToroCWQqP3ZE14j", "label": "12.4293 BTC", "to": "c371055c54bf832e9a8ebb18692e84ba66f1bb9a37ac9f83d640d21d81baffad"}, {"arrows": "to", "from": "c371055c54bf832e9a8ebb18692e84ba66f1bb9a37ac9f83d640d21d81baffad", "label": "11.731 BTC", "to": "1FzYPNo6p4jjeFG8Ta1HybNvWow5wPgQAY"}, {"arrows": "to", "color": "#000000", "from": "1FzYPNo6p4jjeFG8Ta1HybNvWow5wPgQAY", "label": "11.731 BTC", "to": "b8117c4452df0d278db46df6eb7fdfdd8220821cb63388c3e1ca83dabbbc1762"}, {"arrows": "to", "from": "b8117c4452df0d278db46df6eb7fdfdd8220821cb63388c3e1ca83dabbbc1762", "label": "11.7308 BTC", "to": "19vAtnr5PYtFJ61JCaKksQEgwgAsGwaK8n"}, {"arrows": "to", "color": "#000000", "from": "19vAtnr5PYtFJ61JCaKksQEgwgAsGwaK8n", "label": "11.7308 BTC", "to": "fbcbd57f3805429fdb6b5cdc81205be1d8d62c63a3d164fc8dab1050cd6fceaa"}, {"arrows": "to", "from": "fbcbd57f3805429fdb6b5cdc81205be1d8d62c63a3d164fc8dab1050cd6fceaa", "label": "10.0548 BTC", "to": "142L2XTu8u98cfwXS8wqyYKFB4JjrJ78WY"}, {"arrows": "to", "color": "#000000", "from": "142L2XTu8u98cfwXS8wqyYKFB4JjrJ78WY", "label": "10.0548 BTC", "to": "c09eeebfb7ed398d4a65d98c66ca79e34ea9877ef74671510026945878fb6b66"}, {"arrows": "to", "from": "c09eeebfb7ed398d4a65d98c66ca79e34ea9877ef74671510026945878fb6b66", "label": "5.0273 BTC", "to": "1MBNQKnxUozyJmrNh6Hg6dY971sD9Wk9U1"}, {"arrows": "to", "from": "c09eeebfb7ed398d4a65d98c66ca79e34ea9877ef74671510026945878fb6b66", "label": "5.0271 BTC", "to": "1LBDCWA573X7xMfRAWTRdGDY9pDF6dXG2B"}, {"arrows": "to", "color": "#000000", "from": "1MBNQKnxUozyJmrNh6Hg6dY971sD9Wk9U1", "label": "5.0273 BTC", "to": "897991187072aed0331a07405628bcf59a1d1c856657a033871ab93697be6c3f"}, {"arrows": "to", "from": "897991187072aed0331a07405628bcf59a1d1c856657a033871ab93697be6c3f", "label": "3.3514 BTC", "to": "39ChjgGzMZAUzP88LB6g1k4jEmka5G8VFz"}, {"arrows": "to", "color": "#000000", "from": "1LBDCWA573X7xMfRAWTRdGDY9pDF6dXG2B", "label": "5.0271 BTC", "to": "86499f4bc258f04c146bde28d01f1eb57eb1cc1ac299d1bf2a464d473a8b51d8"}, {"arrows": "to", "from": "86499f4bc258f04c146bde28d01f1eb57eb1cc1ac299d1bf2a464d473a8b51d8", "label": "2.5135 BTC", "to": "3A99TqWrJ1cVDWKnTyqjAGXMcUFa3Rt2TZ"}, {"arrows": "to", "from": "86499f4bc258f04c146bde28d01f1eb57eb1cc1ac299d1bf2a464d473a8b51d8", "label": "2.5133 BTC", "to": "1FVPGuSQVSr87ZPpnucXbNGFVx7ULgwYyT"}, {"arrows": "to", "color": "#000000", "from": "39ChjgGzMZAUzP88LB6g1k4jEmka5G8VFz", "label": "3.3514 BTC", "to": "cb3955e368f09b62459dec0aec428fad591920477eb59a5efa03445cbaceaa50"}, {"arrows": "to", "from": "cb3955e368f09b62459dec0aec428fad591920477eb59a5efa03445cbaceaa50", "label": "18.2493 BTC", "to": "32akBMy2v39TdV6syzz7LzkGWGeAFruS6P"}, {"arrows": "to", "color": "#000000", "from": "3A99TqWrJ1cVDWKnTyqjAGXMcUFa3Rt2TZ", "label": "2.5135 BTC", "to": "9399af674f805e79997045b9fa4e4e8858126307a59f4d42400219440d46ffb1"}, {"arrows": "to", "from": "9399af674f805e79997045b9fa4e4e8858126307a59f4d42400219440d46ffb1", "label": "2.524 BTC", "to": "15X27JToPDxxhxx7PUAbmaVTFNsKtJtSJ1"}, {"arrows": "to", "color": "#000000", "from": "15X27JToPDxxhxx7PUAbmaVTFNsKtJtSJ1", "label": "2.524 BTC", "to": "2af738203322c84ab869e3290e84dbba3db4d599e389666b8437e2982cc4d72f"}, {"arrows": "to", "from": "2af738203322c84ab869e3290e84dbba3db4d599e389666b8437e2982cc4d72f", "label": "1.7817 BTC", "to": "1D2yJGWZxCpXKifYqfraic9TgkZC1jxCRs"}, {"arrows": "to", "color": "#000000", "from": "1FVPGuSQVSr87ZPpnucXbNGFVx7ULgwYyT", "label": "2.5133 BTC", "to": "bcba127756c5982d318c782f0dd0e85d861d4470750da326c5a836916358fa12"}, {"arrows": "to", "from": "bcba127756c5982d318c782f0dd0e85d861d4470750da326c5a836916358fa12", "label": "2.4213 BTC", "to": "14ScwMNdQqwSnvuHBf7yWYVXpYt9omWwRN"}, {"arrows": "to", "color": "#000000", "from": "14ScwMNdQqwSnvuHBf7yWYVXpYt9omWwRN", "label": "2.4213 BTC", "to": "4d609470a4ab1264dae6c781f2043d4a68f0f863f66e7d17824d0e98539c6eda"}, {"arrows": "to", "from": "4d609470a4ab1264dae6c781f2043d4a68f0f863f66e7d17824d0e98539c6eda", "label": "2.3363 BTC", "to": "12r8KdUS12QCND8jMTNMh2n8QF9q3f5JxY"}, {"arrows": "to", "color": "#000000", "from": "12r8KdUS12QCND8jMTNMh2n8QF9q3f5JxY", "label": "2.3363 BTC", "to": "12e513b73db66a9478c4fcb9fdb64cbdc586b75bff97772013e726f0ef53ecd2"}, {"arrows": "to", "from": "12e513b73db66a9478c4fcb9fdb64cbdc586b75bff97772013e726f0ef53ecd2", "label": "2.2519 BTC", "to": "1Ji14xdnJMwguyBrv44VRwqEXTyxesQs7L"}, {"arrows": "to", "color": "#000000", "from": "1Ji14xdnJMwguyBrv44VRwqEXTyxesQs7L", "label": "2.2519 BTC", "to": "3b56c0710eb610eaaf6a3dfbe5426ac7942bddc096d3c562af6aa9aa5fda5ea7"}, {"arrows": "to", "from": "3b56c0710eb610eaaf6a3dfbe5426ac7942bddc096d3c562af6aa9aa5fda5ea7", "label": "2.1675 BTC", "to": "16V3PFPyBwQsv1QYxCiu63oNKksmenMF4Y"}, {"arrows": "to", "color": "#000000", "from": "16V3PFPyBwQsv1QYxCiu63oNKksmenMF4Y", "label": "2.1675 BTC", "to": "fbffd56b3d2d76a6ab6bda22836c11cd3181efbf4aa2fc5b5725e323b2becdfb"}, {"arrows": "to", "from": "fbffd56b3d2d76a6ab6bda22836c11cd3181efbf4aa2fc5b5725e323b2becdfb", "label": "2.0812 BTC", "to": "1FLPb5CCR62jNK1o3aZFyvsgsXZmVVH1nj"}, {"arrows": "to", "color": "#000000", "from": "1FLPb5CCR62jNK1o3aZFyvsgsXZmVVH1nj", "label": "2.0812 BTC", "to": "a598768d6b1b673d5ddbec6dba45f48d53ea367ae400e28fa4fc10a00a9d9326"}, {"arrows": "to", "from": "a598768d6b1b673d5ddbec6dba45f48d53ea367ae400e28fa4fc10a00a9d9326", "label": "1.9952 BTC", "to": "12aHoLYuEAsfuv6MGwgWHsKxcu2rDMsSt5"}, {"arrows": "to", "color": "#000000", "from": "12aHoLYuEAsfuv6MGwgWHsKxcu2rDMsSt5", "label": "1.9952 BTC", "to": "7fd6f37189b369954b73e7b1ff5acb775466333b4671dedce8dd2fcb00b1652f"}, {"arrows": "to", "from": "7fd6f37189b369954b73e7b1ff5acb775466333b4671dedce8dd2fcb00b1652f", "label": "1.9078 BTC", "to": "1J86npfPeiYf783h4kS4xNxvCUcwUgfXuo"}, {"arrows": "to", "color": "#000000", "from": "1J86npfPeiYf783h4kS4xNxvCUcwUgfXuo", "label": "1.9078 BTC", "to": "4bd9e244068c99b29b598075a3e5ec71c8cf476b65444dccb1dce8a08f71bcec"}, {"arrows": "to", "from": "4bd9e244068c99b29b598075a3e5ec71c8cf476b65444dccb1dce8a08f71bcec", "label": "1.8591 BTC", "to": "16uapq1pfsWdTerioJG962YyVk1rN4Ahi1"}, {"arrows": "to", "color": "#000000", "from": "16uapq1pfsWdTerioJG962YyVk1rN4Ahi1", "label": "1.8591 BTC", "to": "44de61881acd5a3127d4c925e539b020cb63af2f201cfca72ed96adc5f77c730"}, {"arrows": "to", "from": "44de61881acd5a3127d4c925e539b020cb63af2f201cfca72ed96adc5f77c730", "label": "1.768 BTC", "to": "1Lp8FH1qL3rxppJqn3NRBvLemUR6D4rS7e"}, {"arrows": "to", "color": "#000000", "from": "1D2yJGWZxCpXKifYqfraic9TgkZC1jxCRs", "label": "1.7817 BTC", "to": "caffe1315a58a163508100b0894f5062da61cfbc32d49e121712c6593d464826"}, {"arrows": "to", "color": "#000000", "from": "1Lp8FH1qL3rxppJqn3NRBvLemUR6D4rS7e", "label": "1.768 BTC", "to": "ae9b8053e55bf18ec9d1b045f12869939bd64b06b7612065ae9186ad3e9f11ce"}, {"arrows": "to", "color": "#000000", "from": "bc1q8d2s23g2v82xt29jsvnvv7y89k2y43at0llvw2", "label": "1.7456 BTC", "to": "a5ca64fbf493974e7f69f7a6b337192174a8d3b76e77e496393df7447bd8365c"}, {"arrows": "to", "color": "#000000", "from": "bc1qlhzr7y3whlhfccdx46g2l2uyftdkmnddyngxnv", "label": "1.7456 BTC", "to": "6f119e9c33223b6c48266e72e818de77eeb548a6994e35adb360c1b92fd8ae68"}, {"arrows": "to", "from": "6f119e9c33223b6c48266e72e818de77eeb548a6994e35adb360c1b92fd8ae68", "label": "606.2112 BTC", "to": "bc1qadh3x0p2svjyeqmyda8deqcu6j877d6tktpyk8"}, {"arrows": "to", "color": "#000000", "from": "bc1qadh3x0p2svjyeqmyda8deqcu6j877d6tktpyk8", "label": "606.2112 BTC", "to": "2aa8c260366035248defa6f8240e7184aac4405bc9b1b3d6d4cdbb0dd37c3d42"}, {"arrows": "to", "from": "2aa8c260366035248defa6f8240e7184aac4405bc9b1b3d6d4cdbb0dd37c3d42", "label": "544.59 BTC", "to": "bc1qlrve3u5ee5v2v6vpkxlpzwkde2fqf50y7u0e20"}, {"arrows": "to", "from": "2aa8c260366035248defa6f8240e7184aac4405bc9b1b3d6d4cdbb0dd37c3d42", "label": "60.6312 BTC", "to": "bc1q8u0u8t2ef0wf3vrf8mf9qr7vkkccenhhta7suw"}, {"arrows": "to", "color": "#000000", "from": "bc1qlrve3u5ee5v2v6vpkxlpzwkde2fqf50y7u0e20", "label": "544.59 BTC", "to": "7caf8e9843d97f6bfef449e034ad4b24e769fab2bfee32a40a567fbee3510027"}, {"arrows": "to", "from": "7caf8e9843d97f6bfef449e034ad4b24e769fab2bfee32a40a567fbee3510027", "label": "497.8477 BTC", "to": "bc1q4cwaz7cw06dlestmv6dyqllwvje60lzpapzd34"}, {"arrows": "to", "color": "#000000", "from": "bc1q4cwaz7cw06dlestmv6dyqllwvje60lzpapzd34", "label": "497.8477 BTC", "to": "54be1015aca97128389fb968b8c4dc00d1a60eb825036c97484f158a31988e4e"}, {"arrows": "to", "from": "54be1015aca97128389fb968b8c4dc00d1a60eb825036c97484f158a31988e4e", "label": "450.0131 BTC", "to": "bc1qzdn3lt7dcmmef3gplxgekj905tk68z80vyptwt"}, {"arrows": "to", "color": "#000000", "from": "bc1qzdn3lt7dcmmef3gplxgekj905tk68z80vyptwt", "label": "450.0131 BTC", "to": "9c116c98555927897a3001bfe79fc170036b3119058b6d065481500eada93089"}, {"arrows": "to", "from": "9c116c98555927897a3001bfe79fc170036b3119058b6d065481500eada93089", "label": "402.1785 BTC", "to": "bc1qpdxflrcpsmx4pddymwdem0dapeuamf4qh9jrdl"}, {"arrows": "to", "color": "#000000", "from": "bc1qpdxflrcpsmx4pddymwdem0dapeuamf4qh9jrdl", "label": "402.1785 BTC", "to": "5e23230807c9dbefd7e8736837949d9ea568012231a6ece3795645bee8b0b119"}, {"arrows": "to", "from": "5e23230807c9dbefd7e8736837949d9ea568012231a6ece3795645bee8b0b119", "label": "354.3427 BTC", "to": "bc1qcrp40kk8gw8qghh3hu9h0jsez42zv6sv964zla"}, {"arrows": "to", "color": "#000000", "from": "bc1qcrp40kk8gw8qghh3hu9h0jsez42zv6sv964zla", "label": "354.3427 BTC", "to": "df7a598a64403c11075896f30253cd7f3f0162a0022c21cf935de91688e93129"}, {"arrows": "to", "color": "#000000", "from": "bc1qcrp40kk8gw8qghh3hu9h0jsez42zv6sv964zla", "label": "67.3136 BTC", "to": "bfa0b5bdbcab3ae3ae200a895781cae88d869edec8eff99a6608b7698474cbd9"}, {"arrows": "to", "from": "df7a598a64403c11075896f30253cd7f3f0162a0022c21cf935de91688e93129", "label": "306.5068 BTC", "to": "bc1q7fffun3u7dhn0t2mcc0mtujw8xmm5wd3aa7nv7"}, {"arrows": "to", "color": "#000000", "from": "bc1q7fffun3u7dhn0t2mcc0mtujw8xmm5wd3aa7nv7", "label": "306.5068 BTC", "to": "7bd09e5fccf5b34cdf49d1ffdb00dd68e48bc88437df3dde10d5f079bad0da7f"}, {"arrows": "to", "from": "7bd09e5fccf5b34cdf49d1ffdb00dd68e48bc88437df3dde10d5f079bad0da7f", "label": "258.671 BTC", "to": "bc1qhzcn45jwjz7723dktkch8g4470kgdxdm2vfha9"}, {"arrows": "to", "color": "#000000", "from": "bc1qhzcn45jwjz7723dktkch8g4470kgdxdm2vfha9", "label": "258.671 BTC", "to": "36efc26a173e1083106c387eeac0a11a4ad071bd3559b7596144db29c1478aba"}, {"arrows": "to", "from": "36efc26a173e1083106c387eeac0a11a4ad071bd3559b7596144db29c1478aba", "label": "210.8351 BTC", "to": "bc1q29mcdvxymrcpuzmewxry33rvetm40ls6etf7wd"}, {"arrows": "to", "color": "#000000", "from": "bc1q29mcdvxymrcpuzmewxry33rvetm40ls6etf7wd", "label": "210.8351 BTC", "to": "f42abc7c64d84dda47443a79af13290484172004abb527417581706ffeb1d048"}, {"arrows": "to", "from": "f42abc7c64d84dda47443a79af13290484172004abb527417581706ffeb1d048", "label": "162.9946 BTC", "to": "bc1qyqhjd84jk84asfuad9zecwjzv8tfv7yzucsxje"}, {"arrows": "to", "from": "f42abc7c64d84dda47443a79af13290484172004abb527417581706ffeb1d048", "label": "47.8405 BTC", "to": "bc1qkrcsg4ux4rcphk38kspssqwtce0ztezxmywxhc"}, {"arrows": "to", "color": "#000000", "from": "bc1qyqhjd84jk84asfuad9zecwjzv8tfv7yzucsxje", "label": "162.9946 BTC", "to": "dd2f56f419a567cf49996aa178982ca8ca1d57db857291b906a35d5d47b3972e"}, {"arrows": "to", "from": "dd2f56f419a567cf49996aa178982ca8ca1d57db857291b906a35d5d47b3972e", "label": "115.1541 BTC", "to": "bc1qmg0vtwzcpsexymcf7wm65du5s4mgcw2nn8zead"}, {"arrows": "to", "color": "#000000", "from": "bc1qmg0vtwzcpsexymcf7wm65du5s4mgcw2nn8zead", "label": "115.1541 BTC", "to": "5cac86f15187f1b1c0f9c38d0ce14e2266493d524a41d7b531f2e18440bbdf93"}, {"arrows": "to", "from": "5cac86f15187f1b1c0f9c38d0ce14e2266493d524a41d7b531f2e18440bbdf93", "label": "67.3136 BTC", "to": "bc1qcrp40kk8gw8qghh3hu9h0jsez42zv6sv964zla"}, {"arrows": "to", "color": "#000000", "from": "bc1q8u0u8t2ef0wf3vrf8mf9qr7vkkccenhhta7suw", "label": "60.6312 BTC", "to": "1834bf62008556eff497a3ddadd3bf3c4f634f19f8bbdebcba3b960a6774a03e"}, {"arrows": "to", "from": "1834bf62008556eff497a3ddadd3bf3c4f634f19f8bbdebcba3b960a6774a03e", "label": "60.6311 BTC", "to": "bc1qh7jtnkx8wnwcv4jdgw7p3fh5zwngexm87e546k"}, {"arrows": "to", "color": "#000000", "from": "bc1qh7jtnkx8wnwcv4jdgw7p3fh5zwngexm87e546k", "label": "60.6311 BTC", "to": "38854b6b3b59bafa817138d573cbbd30d08f7a695233f41603ae808133a192a5"}, {"arrows": "to", "color": "#000000", "from": "bc1qkrcsg4ux4rcphk38kspssqwtce0ztezxmywxhc", "label": "47.8405 BTC", "to": "b00d02d2d163b77796a7dabc307cd16606ead60533b1334f993225d77d7e733f"}, {"arrows": "to", "from": "b00d02d2d163b77796a7dabc307cd16606ead60533b1334f993225d77d7e733f", "label": "516.1262 BTC", "to": "bc1qdhfdn9phlshxat6cdtdqtv7edrnet8sgcyvkf3"}, {"arrows": "to", "color": "#000000", "from": "bc1qdhfdn9phlshxat6cdtdqtv7edrnet8sgcyvkf3", "label": "516.1262 BTC", "to": "861fd0b55e64bee6b074dcb67464a609dfd3ef95f04733303f1351b4c7419944"}, {"arrows": "to", "from": "861fd0b55e64bee6b074dcb67464a609dfd3ef95f04733303f1351b4c7419944", "label": "316.1262 BTC", "to": "bc1qx8h76mjnv3pdl60tv7ev85fld86k4cj87edpnr"}, {"arrows": "to", "from": "861fd0b55e64bee6b074dcb67464a609dfd3ef95f04733303f1351b4c7419944", "label": "100 BTC", "to": "bc1qgn85lp7pd874nj4hp94mmm2mdl44kqtskte3dw"}, {"arrows": "to", "color": "#000000", "from": "bc1qx8h76mjnv3pdl60tv7ev85fld86k4cj87edpnr", "label": "316.1262 BTC", "to": "9ea5f200cb59efad42e25708229b9ce5b148836ae959ca23c18cf078da5b7765"}, {"arrows": "to", "from": "9ea5f200cb59efad42e25708229b9ce5b148836ae959ca23c18cf078da5b7765", "label": "116.1261 BTC", "to": "bc1qzk6yv3uhmq2yqdya4v4fshzgzttl03emcf8atl"}, {"arrows": "to", "from": "9ea5f200cb59efad42e25708229b9ce5b148836ae959ca23c18cf078da5b7765", "label": "100 BTC", "to": "bc1qgn85lp7pd874nj4hp94mmm2mdl44kqtskte3dw"}, {"arrows": "to", "color": "#000000", "from": "bc1qzk6yv3uhmq2yqdya4v4fshzgzttl03emcf8atl", "label": "116.1261 BTC", "to": "a061b35b7218ea0c0fef88a76237937cfb74a25293cf2ad3b3e33db7a22fd813"}, {"arrows": "to", "color": "#000000", "from": "bc1qgn85lp7pd874nj4hp94mmm2mdl44kqtskte3dw", "label": "100 BTC", "to": "4b2780250ed8eb89a3722c6ec95834e5b9a34d12d23a32aa10955c5a24d29774"}, {"arrows": "to", "from": "4b2780250ed8eb89a3722c6ec95834e5b9a34d12d23a32aa10955c5a24d29774", "label": "315.708 BTC", "to": "bc1qzqp68y576uwqkqtuf9z4pff33tm2qgn2fsaua0"}, {"arrows": "to", "color": "#000000", "from": "bc1qzqp68y576uwqkqtuf9z4pff33tm2qgn2fsaua0", "label": "315.708 BTC", "to": "49d39ce10a43d977e07330c72afe30ee586be703107195ac2c5ad68a73b0bd75"}, {"arrows": "to", "from": "49d39ce10a43d977e07330c72afe30ee586be703107195ac2c5ad68a73b0bd75", "label": "315.699 BTC", "to": "bc1quqpjvcq70mdnwhaxtzp5zycxea5w0hazt49fhy"}, {"arrows": "to", "color": "#000000", "from": "bc1quqpjvcq70mdnwhaxtzp5zycxea5w0hazt49fhy", "label": "315.699 BTC", "to": "5598ed98657d85922db00ef522015b8cc07e8b8b5831f5518f28485427b2978a"}, {"arrows": "to", "from": "5598ed98657d85922db00ef522015b8cc07e8b8b5831f5518f28485427b2978a", "label": "315.681 BTC", "to": "bc1qnwv3q8w3ycqr6hf8vavf8wkcy3grz0hzqeh3hr"}, {"arrows": "to", "color": "#000000", "from": "bc1qnwv3q8w3ycqr6hf8vavf8wkcy3grz0hzqeh3hr", "label": "315.681 BTC", "to": "44b1f1fd6899aa9d8a4e3d015e5a4e594282cd8ad28dd1d43b0058804e386253"}, {"arrows": "to", "from": "44b1f1fd6899aa9d8a4e3d015e5a4e594282cd8ad28dd1d43b0058804e386253", "label": "315.5244 BTC", "to": "bc1qmvzfdw2he3uka204lkke4zdffqt4dd7hp6cluh"}, {"arrows": "to", "color": "#000000", "from": "bc1qmvzfdw2he3uka204lkke4zdffqt4dd7hp6cluh", "label": "315.5244 BTC", "to": "66c85096a0711a9491bce76dad854b858db6d7a93250b576011357cfdb0a7b89"}, {"arrows": "to", "from": "66c85096a0711a9491bce76dad854b858db6d7a93250b576011357cfdb0a7b89", "label": "314.7334 BTC", "to": "bc1qfxxsfvh9jd4ycyfkge64lugapswq0nysm6rxfn"}, {"arrows": "to", "color": "#000000", "from": "bc1qfxxsfvh9jd4ycyfkge64lugapswq0nysm6rxfn", "label": "314.7334 BTC", "to": "5d1032d7ffb935ffe4994c6fc0c341f138aed7ff62911e0386de12e9929d0a7e"}, {"arrows": "to", "from": "5d1032d7ffb935ffe4994c6fc0c341f138aed7ff62911e0386de12e9929d0a7e", "label": "313.8475 BTC", "to": "bc1qh75pheqqntvu73ud28q5r6r49z6husffy6tzht"}, {"arrows": "to", "color": "#000000", "from": "bc1qh75pheqqntvu73ud28q5r6r49z6husffy6tzht", "label": "313.8475 BTC", "to": "2eb961f69decca4d06f522be5728aa7cb119b666ec6b0c2ebe78f12ec00e00f9"}, {"arrows": "to", "from": "2eb961f69decca4d06f522be5728aa7cb119b666ec6b0c2ebe78f12ec00e00f9", "label": "256.6433 BTC", "to": "bc1qgjerj2rrhg3mxsh9wsr3h69zq2wxz09cdjrla2"}, {"arrows": "to", "color": "#000000", "from": "bc1qgjerj2rrhg3mxsh9wsr3h69zq2wxz09cdjrla2", "label": "256.6433 BTC", "to": "ced8305e937e0bae11f9c998946e01d7355acfe80e180946b7c06d2734b9ad9f"}, {"arrows": "to", "from": "ced8305e937e0bae11f9c998946e01d7355acfe80e180946b7c06d2734b9ad9f", "label": "199.2437 BTC", "to": "bc1q544vq2qh0g75cf9ap662d9p38yqv7dlly6vgll"}, {"arrows": "to", "color": "#000000", "from": "bc1q544vq2qh0g75cf9ap662d9p38yqv7dlly6vgll", "label": "199.2437 BTC", "to": "e7cc56c60c3e6af60694ff162a2303ccd1677cd1c96c3aebe57de8cb36da9110"}, {"arrows": "to", "from": "e7cc56c60c3e6af60694ff162a2303ccd1677cd1c96c3aebe57de8cb36da9110", "label": "199.2437 BTC", "to": "bc1qzr0y2fvyy7aylqalrwtmhtshekv6899x6y623c"}, {"arrows": "to", "color": "#000000", "from": "bc1qzr0y2fvyy7aylqalrwtmhtshekv6899x6y623c", "label": "199.2437 BTC", "to": "2499dd4581dc22e4940f240d4f313374f9bbaab08aa09ffdf66941255ab73926"}, {"arrows": "to", "from": "2499dd4581dc22e4940f240d4f313374f9bbaab08aa09ffdf66941255ab73926", "label": "137.0436 BTC", "to": "bc1qw8cr9z2ruul0enag07qf6qu2tg2rygsr60d4s9"}, {"arrows": "to", "color": "#000000", "from": "bc1qw8cr9z2ruul0enag07qf6qu2tg2rygsr60d4s9", "label": "137.0436 BTC", "to": "0e3a97be292cd0fdea4a9d403cdf56da042872b32f849b47e67db0e21b2cd1e0"}, {"arrows": "to", "from": "0e3a97be292cd0fdea4a9d403cdf56da042872b32f849b47e67db0e21b2cd1e0", "label": "137 BTC", "to": "bc1q84v7v6zuxwgccal506ye0tsn3dkdzm6u8qf4wn"}, {"arrows": "to", "color": "#000000", "from": "bc1q84v7v6zuxwgccal506ye0tsn3dkdzm6u8qf4wn", "label": "137 BTC", "to": "22d1612060fcb19589dddfecbe933cb27f99dde65e19b587669decc40b86f3fb"}, {"arrows": "to", "from": "22d1612060fcb19589dddfecbe933cb27f99dde65e19b587669decc40b86f3fb", "label": "136.9999 BTC", "to": "bc1qm5uuutgcfd6fepuefgg6tpmx4x9qpeytt364zh"}, {"arrows": "to", "color": "#000000", "from": "bc1qm5uuutgcfd6fepuefgg6tpmx4x9qpeytt364zh", "label": "136.9999 BTC", "to": "a80c16e85bfa09e08b66a68b4649d803092022c4be632b51c560578071b32cff"}, {"arrows": "to", "from": "a80c16e85bfa09e08b66a68b4649d803092022c4be632b51c560578071b32cff", "label": "136.9999 BTC", "to": "bc1q0mla0ndn4wajd8gjn6kh4pz5wmtkkzygud2apv"}, {"arrows": "to", "color": "#000000", "from": "bc1q0mla0ndn4wajd8gjn6kh4pz5wmtkkzygud2apv", "label": "136.9999 BTC", "to": "53720082a85a46702558a4a5549195d403c190bfef1120f5f98ab40dbbd0e292"}, {"arrows": "to", "from": "53720082a85a46702558a4a5549195d403c190bfef1120f5f98ab40dbbd0e292", "label": "136.9998 BTC", "to": "bc1q3hsjudd7h6u2egmlr5kquwh56wavaat3ssvv62"}, {"arrows": "to", "color": "#000000", "from": "bc1q3hsjudd7h6u2egmlr5kquwh56wavaat3ssvv62", "label": "136.9998 BTC", "to": "42d05e4c2a2fb4e02d2a8dca1a82c7b5202f288a6cc292fa17964c60f68ecac4"}, {"arrows": "to", "from": "42d05e4c2a2fb4e02d2a8dca1a82c7b5202f288a6cc292fa17964c60f68ecac4", "label": "68.5 BTC", "to": "bc1qagd7c6m5lz2dqkf0hmxq20z606ll5xrwcgevafl9hv9z46vlg58s7tg5c7"}, {"arrows": "to", "from": "42d05e4c2a2fb4e02d2a8dca1a82c7b5202f288a6cc292fa17964c60f68ecac4", "label": "68.4998 BTC", "to": "bc1q0g9mltdrguf6cmt2sqht9xhgg5y5307w7fkdy6"}, {"arrows": "to", "color": "#000000", "from": "bc1qagd7c6m5lz2dqkf0hmxq20z606ll5xrwcgevafl9hv9z46vlg58s7tg5c7", "label": "68.5 BTC", "to": "e9771e403e811087263d23594dcd78fd7e87209b73bd613e81b56aeb143ca054"}, {"arrows": "to", "color": "#000000", "from": "bc1q0g9mltdrguf6cmt2sqht9xhgg5y5307w7fkdy6", "label": "68.4998 BTC", "to": "a0a6850260794f2ab6de2676b73a5ecdc10b719e1944e28eb67f713c7e7c3454"}, {"arrows": "to", "from": "a0a6850260794f2ab6de2676b73a5ecdc10b719e1944e28eb67f713c7e7c3454", "label": "68.4997 BTC", "to": "bc1q4jus5ldskzw3wauvdd7ng3ds3z87hfurglw9mf"}, {"arrows": "to", "color": "#000000", "from": "bc1q4jus5ldskzw3wauvdd7ng3ds3z87hfurglw9mf", "label": "68.4997 BTC", "to": "f5225af6cd99bf9101cd18dfec220aa99501d0df11ec77f565b6e5179f71e941"}, {"arrows": "to", "from": "f5225af6cd99bf9101cd18dfec220aa99501d0df11ec77f565b6e5179f71e941", "label": "68.4996 BTC", "to": "bc1qswcn3ft25k8evg4qqmk02d8vlp7kr4sh3tg0pm"}, {"arrows": "to", "color": "#000000", "from": "bc1qswcn3ft25k8evg4qqmk02d8vlp7kr4sh3tg0pm", "label": "68.4996 BTC", "to": "cedf3ac81688399d7a72275d1abd8e57f43cfc3b7f9b59c7be1c0c03face1361"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+                      network.on("stabilizationProgress", function(params) {
+                          document.getElementById('loadingBar').removeAttribute("style");
+                          var maxWidth = 496;
+                          var minWidth = 20;
+                          var widthFactor = params.iterations/params.total;
+                          var width = Math.max(minWidth,maxWidth * widthFactor);
+                          document.getElementById('bar').style.width = width + 'px';
+                          document.getElementById('text').innerHTML = Math.round(widthFactor*100) + '%';
+                      });
+                      network.once("stabilizationIterationsDone", function() {
+                          document.getElementById('text').innerHTML = '100%';
+                          document.getElementById('bar').style.width = '496px';
+                          document.getElementById('loadingBar').style.opacity = 0;
+                          // really clean the dom element
+                          setTimeout(function () {document.getElementById('loadingBar').style.display = 'none';}, 500);
+                      });
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+    <script type="text/javascript">
+    async function fetchAncestors(nodeId) {
+        const response = await fetch("http://127.0.0.1:5000/get_parents", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ node_id: nodeId })
+        });
+
+        const data = await response.json();
+        return data.nodes;
+    }
+
+    network.on("click", async function (params) {
+        if (params.nodes.length > 0) {
+            const clickedNode = params.nodes[0];
+            console.log("Node clicked:", clickedNode);
+
+            const visibleNodes = await fetchAncestors(clickedNode);
+
+            // Mettre les noeuds non inclus en gris
+            nodes.get().forEach((node) => {
+                const keep = visibleNodes.includes(node.id);
+                nodes.update({ id: node.id, color: keep ? "#00FF00" : "#d3d3d3" });
+            });
+
+            edges.get().forEach((edge) => {
+                const keep = visibleNodes.includes(edge.from) && visibleNodes.includes(edge.to);
+                edges.update({ id: edge.id, color: keep ? "#0000" : "#d3d3d3" });
+            });
+        }
+    });
+    </script>
+    
+</body>
+</html>
