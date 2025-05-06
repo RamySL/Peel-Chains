@@ -2,8 +2,8 @@
 Le projet a pour but de pouvoir générer un graphe de transactions à partir d'une transaction de départ donnée.
 
 ### Lancement du programme  
-1) Il faut lancer le serveur Flask [src/server.py](src/server.py).  
-2) Dans un autre terminal, lancer le [src/main.py](src/main.py) avec les paramètres de votre choix.
+1) Il faut lancer le serveur Flask [/server](src/server.py).  
+2) Dans un autre terminal, lancer le [/main.py](src/main.py) avec les paramètres de votre choix.
 
 ### Explication du rendu du graphe
 
