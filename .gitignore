@@ -4,3 +4,4 @@ src/test_mpyvis.py
 lib/
 __pycache__/
 html/graph_test.html
+*.txt

@@ -1,5 +1,5 @@
 from pyvis.network import Network
-from mixers import *
+from generator import *
 import time
 import json
 import os
